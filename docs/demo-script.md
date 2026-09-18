@@ -7,22 +7,39 @@ số liệu trong file này là số đo thật trên máy nhóm (openai · gpt-
 
 ## 0. Chuẩn bị (làm 5 phút trước khi lên)
 
-```bash
-# 1. Bật backend, để nguyên cửa sổ này
-cd backend && .venv/Scripts/uvicorn.exe app.main:app --port 8000     # Windows
-cd backend && .venv/bin/uvicorn app.main:app --port 8000             # macOS/Linux
+> **Windows PowerShell 5.1 không hiểu `&&`** (báo *"The token '&&' is not a valid statement
+> separator"*). Dùng `;` hoặc tách thành hai dòng như bên dưới. Và phải đứng ở **thư mục
+> `K4-3B-E403-THE-LIEMS`**, không phải thư mục cha `Mini Hackathon`.
 
-# 2. Làm nóng: nạp mô hình + điền bộ nhớ đệm + trả hồ sơ demo về mẫu
-python scripts/warmup_demo.py
+**Cửa sổ 1 — bật backend rồi để yên:**
+
+```powershell
+cd "D:\AITHUCCHIEN\Mini Hackathon\K4-3B-E403-THE-LIEMS\backend"
+.venv\Scripts\uvicorn.exe app.main:app --port 8000
 ```
+
+**Cửa sổ 2 — làm nóng** (nạp mô hình + điền bộ nhớ đệm + trả hồ sơ demo về mẫu):
+
+```powershell
+cd "D:\AITHUCCHIEN\Mini Hackathon\K4-3B-E403-THE-LIEMS"
+backend\.venv\Scripts\python.exe scripts\warmup_demo.py
+```
+
+<details><summary>macOS / Linux</summary>
+
+```bash
+cd backend && .venv/bin/uvicorn app.main:app --port 8000      # cửa sổ 1
+python scripts/warmup_demo.py                                 # cửa sổ 2, từ gốc repo
+```
+</details>
 
 Lần chạy đầu mất ~2 phút (gọi LLM thật). Chạy **lần hai** để chắc chắn: phải thấy dấu `·`
 ở hầu hết các dòng — đó là các lượt đã vào bộ nhớ đệm, lúc demo chỉ còn 2–4 giây.
 
-**Ngay trước khi bước lên**, chạy thêm lệnh này để hồ sơ sạch (không cần gọi LLM, mất 1 giây):
+**Ngay trước khi bấm nút quay**, chạy thêm lệnh này để hồ sơ sạch (không gọi LLM, mất 1 giây):
 
-```bash
-python scripts/warmup_demo.py --reset-only
+```powershell
+backend\.venv\Scripts\python.exe scripts\warmup_demo.py --reset-only
 ```
 
 > ⚠️ **Bắt buộc.** Mỗi lượt hỏi đều ghi vào hồ sơ học viên (nói "chưa hiểu" là hạ mức).
@@ -119,6 +136,73 @@ Chỉ vào nút khiên dưới mỗi câu trả lời:
 
 > "22/23 case đạt trên tập test, 0 case phải dùng mẫu dự phòng. Baseline chỉ hỏi thẳng GPT được 3/21.
 > Mỗi lượt khoảng 4 giây, chi phí dưới 1 xu."
+
+---
+
+## 1b. Quay video
+
+### Dọn màn hình trước khi bấm quay
+
+| Việc | Vì sao |
+|---|---|
+| Đóng hết tab khác (Facebook, Zalo, Supabase…) | Lộ thông tin cá nhân, trông thiếu chuyên nghiệp |
+| **Ẩn thanh bookmark** (`Ctrl+Shift+B`) | Cùng lý do |
+| **Không bao giờ để `.env` lên hình** | Trong đó có `OPENAI_API_KEY` và `SUPABASE_KEY` |
+| Tắt thông báo Zalo/Discord/Slack | Popup giữa video là phải quay lại |
+| Chrome ở chế độ toàn màn hình (`F11`), zoom 100% (`Ctrl+0`) | Chữ đủ to, không thừa viền |
+| Đóng bảng **Kịch bản demo** trước khi bắt đầu | Mở ra đúng lúc cần, tạo nhịp |
+
+> Nếu muốn chắc chắn sạch: mở **cửa sổ khách** của Chrome (`⋮` → Hồ sơ → Khách),
+> vào `localhost:8000`. Không bookmark, không tab, không tiện ích mở rộng.
+
+### Công cụ quay
+
+- **Có sẵn trong Windows:** `Win + Alt + R` (Xbox Game Bar) — quay cửa sổ đang mở, đủ dùng.
+  Bật trước ở *Settings → Gaming → Captures*.
+- **Muốn chỉnh chu hơn:** OBS Studio — quay được cả màn hình + mic, cắt ghép dễ.
+- Quay **1080p**, có tiếng nói của bạn. Không cần webcam.
+
+### Bản 30 giây (CP3) — cắt gọn, không lời thừa
+
+Chỉ giữ **một** ý: cùng câu hỏi, khác người, khác câu trả lời.
+
+| Giây | Trên màn hình | Bạn nói |
+|---|---|---|
+| 0–4 | Trang bài giảng, bôi đen một đoạn | "Học viên đọc bài giảng mà chưa hiểu." |
+| 4–8 | Bấm *Hỏi Trợ giảng AI*, gõ `Self-attention là gì?` | "Bôi đen chỗ vướng rồi hỏi thẳng." |
+| 8–16 | Hồ sơ **Người mới** trả lời | "Người mới: nó dạy `vector` trước, rồi ví dụ đời thường." |
+| 16–24 | Đổi sang **Đã vững**, hỏi lại **đúng câu đó** | "Người đã vững: cùng câu hỏi, nhưng vào thẳng Query–Key–Value." |
+| 24–30 | Trỏ vào nút khiên *"Giữ đủ 3/3 ý chính"* + mã `[T06-130]` | "Mọi câu đều bám bài giảng và xem được đoạn gốc." |
+
+> Mẹo: quay dư khoảng 60 giây rồi cắt. Đừng cố quay đúng 30 giây trong một lần.
+
+**Quay video thì đừng lo độ trễ.** Cứ để nó chờ 5–10 giây rồi **cắt đoạn chờ khi dựng**.
+Làm nóng trước vẫn nên làm (đỡ phải cắt nhiều), nhưng không cần lượt nào cũng phải 2 giây.
+Chỉ khi trình bày **trực tiếp** thì độ trễ mới đáng quan tâm.
+
+**Chữ nghĩa mỗi lần chạy sẽ khác nhau một chút** — LLM không sinh ra y hệt hai lần.
+Cái *ổn định* và là điểm cần quay được là **sự tương phản**:
+
+| Hồ sơ | Luôn đúng ở mọi lần chạy |
+|---|---|
+| Người mới | mức **1**, **dạy `vector` trước** |
+| Đã vững | mức **4**, **không có phần nền, không ví dụ** |
+| Từng hiểu nhờ ví dụ thư viện | **chọn lại đúng ví dụ thư viện** |
+
+Câu chữ hay ví dụ cụ thể có thể đổi giữa các lần quay — không sao, quay được cái gì dùng cái đó.
+
+### Bản demo dự phòng (CP5) — 3–5 phút
+
+Quay đúng 7 beat ở mục 1. Quay **từng beat thành từng đoạn riêng**, hỏng beat nào quay lại
+beat đó, đỡ hơn nhiều so với quay một mạch.
+
+### Ba lỗi hay gặp khi quay
+
+1. **Quên chạy `--reset-only` trước khi quay** → beat 4 ra khảo sát thay vì giải thích,
+   phải quay lại từ đầu. Chạy ngay trước khi bấm nút quay.
+2. **Chờ 15 giây giữa video** → chưa làm nóng. Chạy `warmup_demo.py` hai lần trước đó.
+3. **Quay luôn cả lúc gõ lệnh trong terminal** → dễ lộ đường dẫn, key. Bật server xong
+   mới bắt đầu quay, và chỉ quay cửa sổ trình duyệt.
 
 ---
 
