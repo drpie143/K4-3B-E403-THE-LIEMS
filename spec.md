@@ -199,4 +199,4 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
 | 17/9 | v4: thẻ khái niệm + validator + câu kiểm tra có đáp án hiểu lệch | Rủi ro đơn giản hoá làm lệch kiến thức (§5 #9) |
 | 17/9 | Bỏ menu đổi mức; thang 5 mức nội bộ, nút "Dễ hiểu hơn / Sâu hơn" | Không để học viên thấy nhãn mức; bước nhỏ dễ giao tiếp |
 | 17/9 | Thêm bộ nhớ dài hạn: cách giải thích đã hiệu quả / chưa, quên dần sau 14 ngày | Không lặp lại cách đã thất bại — gốc của P3 |
-| `[…]` | Chốt provider `[OpenAI gpt-4o-mini?]` | Chi phí ước ~1 USD cho cả hackathon |
+| 17/9 | Chốt provider `[OpenAI gpt-4o-mini?]` | Chi phí ước ~1 USD cho cả hackathon |
