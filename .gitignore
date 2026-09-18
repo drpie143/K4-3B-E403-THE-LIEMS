@@ -1,17 +1,21 @@
 # Dữ liệu được cấp — không bao giờ commit
+# (git trên Linux phân biệt hoa/thường nên phải ghi cả Data/)
 *.local.*
-codebase/data/
 data/
+Data/
+backend/Data/
 *.csv
-!codebase/eval/golden_set.csv
+!eval/golden_set.csv
 *.pdf
 
-# Backend: DB, vết, cache, môi trường
-codebase/backend/.venv/
-codebase/backend/p3.db
-codebase/backend/traces/
-codebase/backend/.cache/
-codebase/backend/cards/drafts/
+# Python: môi trường ảo, DB, vết chạy, cache
+.venv/
+venv/
+backend/.venv/
+backend/p3.db
+backend/traces/
+backend/.cache/
+backend/cards/drafts/
 *.db
 *.jsonl
 
@@ -19,6 +23,10 @@ codebase/backend/cards/drafts/
 .env
 .env.*
 !.env.example
+
+# Deploy
+.vercel/
+.render/
 
 # Rác
 __pycache__/

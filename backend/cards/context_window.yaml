@@ -1,0 +1,57 @@
+id: context_window
+term: Context window
+vi_name: cửa sổ ngữ cảnh
+lesson_id: day01-foundation-a
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [context window, cửa sổ ngữ cảnh, ngữ cảnh, context, context rot, quản lý context]
+prerequisites: [token]
+required_terms: [ngữ cảnh, token, quên]
+
+core_claims:
+  - id: C1
+    text: "<b>Context</b> là toàn bộ thông tin mô hình tiêu thụ trong một lần; <b>cửa sổ ngữ cảnh</b> là giới hạn số <b>token</b> của một lượt."
+    src: [T04-051]
+  - id: C2
+    text: "Context rot: càng nhồi nhiều <b>ngữ cảnh</b> thì mô hình càng dễ <b>quên</b> đoạn đầu — cửa sổ lớn không đồng nghĩa với trả lời tốt hơn."
+    src: [T04-052]
+  - id: C3
+    text: "Ít token nhưng đúng chỗ thì mô hình chú ý đúng hơn là một triệu token lẫn lộn, nên việc chọn đưa gì vào ngữ cảnh là kỹ năng chính khi làm việc với AI."
+    src: [T04-053]
+
+approved_analogies:
+  - id: ban_lam_viec
+    text: "Cửa sổ ngữ cảnh giống mặt bàn làm việc: bày được bao nhiêu tài liệu cùng lúc thì xử lý được chừng đó, bày quá nhiều thì rối."
+    src: [T04-051]
+
+analogy_limits:
+  - "Mặt bàn chỉ nói về sức chứa; nó không mô tả việc mô hình quên dần các thông tin ở đầu."
+
+misconceptions:
+  - id: M1
+    pattern: "context cang lon cang tot"
+    text: "Cửa sổ ngữ cảnh càng lớn thì càng thông minh"
+    fix: "Giảng viên nói ngược lại: bật chế độ ngữ cảnh rất lớn nhiều khi lại kém hơn khi ngữ cảnh gọn và chọn lọc."
+    src: [T04-052]
+  - id: M2
+    pattern: "mo hinh nho het moi thu"
+    text: "Mô hình nhớ hết mọi thứ đã nói trong phiên"
+    fix: "Khi vượt cửa sổ, hệ thống phải tóm tắt lại và phần đầu có thể bị mất."
+    src: [T04-052]
+
+outside_lesson_notes:
+  - "Kỹ thuật nén ngữ cảnh hay KV-cache cụ thể không nằm trong buổi này."
+
+primer:
+  html: "<b>Cửa sổ ngữ cảnh</b> là lượng thông tin tối đa mô hình đọc được trong một lượt, tính bằng token."
+  src: [T04-051]
+
+checks:
+  - id: CW-Q1
+    question: "Đưa thật nhiều tài liệu vào ngữ cảnh thì điều gì có thể xảy ra?"
+    options:
+      - { k: A, text: "Mô hình chú ý sai chỗ và quên phần đầu", correct: true }
+      - { k: B, text: "Mô hình luôn trả lời tốt hơn", misconception: M1 }
+      - { k: C, text: "Chi phí token giảm đi" }
+    src: [T04-052]

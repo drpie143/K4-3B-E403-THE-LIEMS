@@ -1,0 +1,58 @@
+# Thẻ khái niệm — soạn từ transcript Day 2 (sáng). Chỉ diễn giải + mã đoạn.
+id: double_diamond
+term: Double Diamond
+vi_name: mô hình kim cương đôi
+lesson_id: day02-problem-scoping
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [kim cương đôi, double diamond, hai viên kim cương, phân kỳ hội tụ, mở rộng hội tụ]
+prerequisites: []
+required_terms: [mở rộng, hội tụ, vấn đề, giải pháp]
+
+core_claims:
+  - id: C1
+    text: "Double Diamond gồm hai viên kim cương: viên thứ nhất để tìm đúng <b>vấn đề</b>, viên thứ hai để tìm đúng <b>giải pháp</b> cho vấn đề đó."
+    src: [T01-049]
+  - id: C2
+    text: "Mỗi viên kim cương có hai pha: <b>mở rộng</b> để có thật nhiều ứng viên, rồi <b>hội tụ</b> để gom nhóm và xếp thứ tự ưu tiên."
+    src: [T01-069, T01-070]
+  - id: C3
+    text: "Xác định sai vấn đề nguy hiểm hơn giải sai: khi vấn đề đã sai thì cả không gian giải pháp bị khoá vào chỗ sai, cộng thêm chi phí chìm khiến rất khó quay lại."
+    src: [T01-058, T01-060]
+
+approved_analogies:
+  - id: kim_cuong
+    text: "Hai viên kim cương xếp cạnh nhau: đường đi lên là mở rộng, đường đi xuống là hội tụ — làm hai lần, một lần cho vấn đề và một lần cho giải pháp."
+    src: [T01-049]
+
+analogy_limits:
+  - "Hình kim cương chỉ mô tả nhịp mở – đóng, không nói bao nhiêu ứng viên là đủ; số lượng tuỳ bài toán."
+
+misconceptions:
+  - id: M1
+    pattern: "chi can mot pha"
+    text: "Chỉ cần một pha, cứ có ý tưởng là làm ngay"
+    fix: "Bỏ pha mở rộng thì mất các ứng viên khác; bỏ pha hội tụ thì không biết nên ưu tiên cái nào."
+    src: [T01-069]
+  - id: M2
+    pattern: "lam sai cai dung nguy hiem hon"
+    text: "Làm sai một vấn đề đúng nguy hiểm hơn làm đúng một vấn đề sai"
+    fix: "Theo bài giảng thì ngược lại: làm đúng một vấn đề sai nguy hiểm hơn, vì mình tự khoá không gian giải pháp vào chỗ sai."
+    src: [T01-060]
+
+outside_lesson_notes:
+  - "Tên gốc và lịch sử mô hình (Design Council, Don Norman) không nằm trong buổi này."
+
+primer:
+  html: "<b>Double Diamond</b> là nhịp làm việc bốn bước: mở rộng rồi hội tụ để chốt vấn đề, sau đó lại mở rộng rồi hội tụ để chốt giải pháp."
+  src: [T01-049]
+
+checks:
+  - id: DD-Q1
+    question: "Viên kim cương thứ nhất trong Double Diamond dùng để làm gì?"
+    options:
+      - { k: A, text: "Tìm đúng vấn đề đáng giải", correct: true }
+      - { k: B, text: "Chốt ngay một giải pháp rồi triển khai", misconception: M1 }
+      - { k: C, text: "Ước lượng chi phí vận hành" }
+    src: [T01-049]

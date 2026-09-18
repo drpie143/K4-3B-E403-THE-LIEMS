@@ -1,0 +1,52 @@
+id: impact_effort
+term: Ma trận tác động – nỗ lực
+vi_name: impact-effort matrix
+lesson_id: day02-problem-scoping
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [ma tran tac dong, ma trận tác động, impact effort, quick win, tác động nỗ lực, xếp ưu tiên]
+prerequisites: [double_diamond]
+required_terms: [tác động, nỗ lực, quick win]
+
+core_claims:
+  - id: C1
+    text: "Sau khi gom nhóm và lọc trùng, mỗi vấn đề được chấm trên hai trục: <b>tác động</b> nếu giải được và <b>nỗ lực</b> phải bỏ ra."
+    src: [T01-074]
+  - id: C2
+    text: "Tác động đo bằng thời gian hoặc tiền tiết kiệm được; nỗ lực đo bằng số người nhân số ngày công — ước lượng thôi cũng đủ để so sánh."
+    src: [T01-078]
+  - id: C3
+    text: "Ô tác động cao – nỗ lực thấp là <b>quick win</b>, nên làm trước; ô nỗ lực cao – tác động thấp thì bỏ."
+    src: [T01-079]
+
+approved_analogies: []
+analogy_limits: []
+
+misconceptions:
+  - id: M1
+    pattern: "cu lam cai kho truoc"
+    text: "Nên làm việc khó nhất trước để chứng minh năng lực"
+    fix: "Bài giảng khuyên chọn quick win trước: thành công nhỏ tạo niềm tin và động lực cho phần còn lại."
+    src: [T01-079]
+  - id: M2
+    pattern: "khong can uoc luong"
+    text: "Không cần ước lượng con số, cứ cảm tính là được"
+    fix: "Phải định lượng dù chỉ là ước lượng, vì đó là cơ sở để so sánh và để thuyết phục cấp trên."
+    src: [T01-078]
+
+outside_lesson_notes:
+  - "Các biến thể như RICE hay WSJF không được nhắc trong buổi này."
+
+primer:
+  html: "<b>Ma trận tác động – nỗ lực</b> là bảng hai trục giúp chọn việc đáng làm trước trong một danh sách dài."
+  src: [T01-074]
+
+checks:
+  - id: IE-Q1
+    question: "Việc nào nên được ưu tiên làm trước theo ma trận tác động – nỗ lực?"
+    options:
+      - { k: A, text: "Tác động cao, nỗ lực thấp", correct: true }
+      - { k: B, text: "Tác động thấp, nỗ lực cao" }
+      - { k: C, text: "Việc khó nhất để chứng minh năng lực", misconception: M1 }
+    src: [T01-079]

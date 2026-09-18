@@ -1,0 +1,206 @@
+# Sổ đăng ký nguồn và buổi học.
+# Chỉ chứa TÓM TẮT do nhóm tự viết + mã đoạn. Nguyên văn transcript nằm ở
+# codebase/data/chunks.local.json (sinh bởi scripts/build_local_data.py, không commit).
+
+lessons:
+  day01-self-attention:
+    title: "Day 1 · LLM Foundation"
+    transcript_files: [transcript-04-clean.md, transcript-06-clean.md]
+    concepts: [self_attention, multi_head, token, vector, similarity]
+
+sources:
+  T04-053:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Attention: mô hình phải chú ý đúng chỗ; đưa quá nhiều ngữ cảnh có thể làm nó chú ý sai."
+  T04-054:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Attention tạo ma trận trọng số cho từng cặp từ để thấy từ nào liên quan nhau; hình minh hoạ chỉ là ví dụ."
+  T04-055:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Mô hình cũ chỉ nhìn các từ cạnh nhau; Transformer có cửa sổ rộng để nối các từ ở xa."
+  T04-056:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Multi-head: nhiều con mắt cùng nhìn, mỗi con mắt một đặc trưng, rồi tổng hợp — ví dụ thầy bói xem voi."
+  T04-057:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Bài học rút ra: quản lý sự chú ý và ngữ cảnh đưa cho mô hình thì làm việc với AI hiệu quả và tiết kiệm hơn."
+  T04-073:
+    section: "Từ mô hình đến AI agent"
+    summary: "Từ mô hình đến AI agent: cho mô hình công cụ và ngữ cảnh để làm việc (mức tổng quan)."
+  T06-126:
+    section: "Transformer — trái tim của LLM"
+    summary: "Luồng Transformer: token → embedding → self-attention (nhìn song song) → feed forward → dự đoán token kế tiếp."
+  T06-127:
+    section: "Transformer — trái tim của LLM"
+    summary: "Văn bản được tách thành token, mỗi token thành vector để tính toán; Transformer xử lý song song, khác RNN/LSTM."
+  T06-128:
+    section: "Transformer — trái tim của LLM"
+    summary: "Vector giống toạ độ GPS định danh token; các token nhìn nhau để tìm similarity score."
+  T06-129:
+    section: "Self-attention: ví dụ con mèo ngồi trên bàn và công thức Q–K–V"
+    summary: "Ví dụ “Con mèo ngồi lên bàn, nó rất đáng yêu”: làm sao biết “nó” là con mèo hay cái bàn?"
+  T06-130:
+    section: "Self-attention: ví dụ con mèo ngồi trên bàn và công thức Q–K–V"
+    summary: "Self-attention: mỗi token nhìn các token khác và đánh giá mức tương đồng; công thức Q (query), K (key), V (value) với softmax."
+  T06-131:
+    section: "Self-attention: ví dụ con mèo ngồi trên bàn và công thức Q–K–V"
+    summary: "Ví dụ thư viện: nhãn bên ngoài cuốn sách là Key, nội dung bên trong là Value, cuốn sách đang tìm là Query."
+  T06-132:
+    section: "Self-attention: ví dụ con mèo ngồi trên bàn và công thức Q–K–V"
+    summary: "Query được so với Key, lấy Value; “nó” và “mèo” có similarity score cao nhất nên “nó” gắn với con mèo."
+  T06-134:
+    section: "Token và cơ chế dự đoán next token"
+    summary: "Token là đơn vị cơ bản của LLM; tiếng Việt thường tốn nhiều token hơn tiếng Anh."
+  T06-135:
+    section: "Token và cơ chế dự đoán next token"
+    summary: "LLM không đọc từng ký tự hay từng từ mà đọc token; cơ chế tự chú ý tính similarity score để đoán từ kế tiếp."
+  T06-136:
+    section: "Token và cơ chế dự đoán next token"
+    summary: "LLM không hiểu ngôn ngữ như con người, nó dự đoán token có xác suất cao nhất; temperature điều chỉnh độ sáng tạo."
+  T06-160:
+    section: "Lab demo: trực quan hóa self-attention"
+    summary: "Lab demo: chạy notebook bertviz + PhoBERT để trực quan hoá self-attention."
+
+# Thuật ngữ biết chắc KHÔNG có trong buổi này → trả "no_source" ngay (đường nhanh).
+# Giá trị: các đoạn gần nhất trong buổi để gợi ý học viên (có thể rỗng).
+# Danh sách này LỚN DẦN: mỗi khi thấy học viên hỏi một thuật ngữ chưa có thẻ, thêm vào đây
+# (kèm đoạn gần nhất trong buổi, nếu có) để trợ giảng từ chối thay vì giải thích nhầm sang khái niệm khác.
+
+  # --- Day 2 · Xác định bài toán kinh doanh cho AI (transcript-01) -------------
+  T01-049:
+    section: "Mô hình Double Diamond: làm đúng cái sai hay làm sai cái đúng?"
+    summary: "Double Diamond: hai viên kim cương, mỗi viên có pha mở rộng rồi pha hội tụ — viên đầu tìm đúng vấn đề, viên sau tìm đúng giải pháp."
+  T01-058:
+    section: "Mô hình Double Diamond: làm đúng cái sai hay làm sai cái đúng?"
+    summary: "Giải một việc luôn đi qua hai bước: xác định vấn đề rồi mới giải; xác định vấn đề nào thì khoanh vùng không gian giải pháp đó."
+  T01-060:
+    section: "Mô hình Double Diamond: làm đúng cái sai hay làm sai cái đúng?"
+    summary: "Làm đúng một vấn đề sai nguy hiểm hơn: không gian giải pháp bị khoá vào chỗ sai, cộng chi phí chìm khiến khó quay lại."
+  T01-069:
+    section: "Phân kỳ – hội tụ và các kỹ thuật khám phá vấn đề"
+    summary: "Vì sao cần hai pha: mở rộng để có nhiều ứng viên (xác suất trúng cao hơn), hội tụ để quy nạp và xếp thứ tự ưu tiên."
+  T01-070:
+    section: "Phân kỳ – hội tụ và các kỹ thuật khám phá vấn đề"
+    summary: "AI hỗ trợ cả hai pha; thói quen của giảng viên là luôn yêu cầu ba phương án kèm phân tích trước khi chốt."
+  T01-074:
+    section: "Ma trận tác động – nỗ lực (impact-effort matrix)"
+    summary: "Pha hội tụ: gom nhóm, hỏi Five Whys, lọc trùng, rồi đặt từng vấn đề lên ma trận tác động – nỗ lực."
+  T01-078:
+    section: "Ma trận tác động – nỗ lực (impact-effort matrix)"
+    summary: "Cách chấm: tác động là tiết kiệm hoặc thu thêm được bao nhiêu; nỗ lực là cần bao nhiêu người, bao nhiêu ngày công."
+  T01-079:
+    section: "Ma trận tác động – nỗ lực (impact-effort matrix)"
+    summary: "Vẽ hai trục rồi xếp việc vào các ô; ô tác động cao – nỗ lực thấp là quick win nên làm trước, ô nỗ lực cao – tác động thấp thì bỏ."
+
+  # --- Day 2 · Chỉ số thành công & mức tự động hoá (transcript-02) -------------
+  T02-019:
+    section: "Chỉ số thành công và đo lường sản phẩm"
+    summary: "Đo lường sản phẩm: số người dùng hay tỉ lệ quay lại chỉ là chỉ số trung gian, phải chọn chỉ số phản ánh đúng mục tiêu."
+  T02-024:
+    section: "Chỉ số thành công và đo lường sản phẩm"
+    summary: "North Star Metric là chỉ số cuối cùng phản ánh giá trị sản phẩm (ví dụ hiệu quả học tập); các chỉ số khác chỉ dẫn dần tới nó."
+  T02-031:
+    section: "Automation và augmentation: chọn mức độ tự động hoá"
+    summary: "Hai thang khi đưa AI vào: automation là để máy tự làm, augmentation là AI hỗ trợ còn người vẫn quyết — và đây là một phổ, không phải hai thái cực."
+  T02-033:
+    section: "Automation và augmentation: chọn mức độ tự động hoá"
+    summary: "Nên bắt đầu ở phía augmentation với người giám sát rồi tăng dần mức tự động, thay vì tự động hoá 100% ngay từ đầu."
+  T02-034:
+    section: "Automation và augmentation: chọn mức độ tự động hoá"
+    summary: "Việc mà sai sẽ gây hậu quả nghiêm trọng thì giữ gần phía augmentation — luôn có con người trong vòng lặp."
+
+  # --- Day 2 · Ràng buộc kỹ thuật (transcript-03) -----------------------------
+  T03-034:
+    section: "Giới hạn của LLM, tool calling và RAG"
+    summary: "Ví dụ đếm chữ cái: thay vì bắt LLM tự đếm, cho nó gọi một hàm — chỉ cần nhận đúng ý định và tham số là kết quả chính xác."
+  T03-035:
+    section: "Giới hạn của LLM, tool calling và RAG"
+    summary: "Dùng LLM thuần cho tác vụ tính toán dễ sai; thêm một lớp nhận diện ý định rồi gọi công cụ thì chắc chắn hơn nhiều."
+  T03-079:
+    section: "Lời giải: tách phần deterministic ra khỏi LLM"
+    summary: "Phần cần chắc chắn thì tách thành tool/function; phần còn lại không chắc chắn là bước chọn đúng tool và tham số nên phải test."
+  T03-105:
+    section: "Scope vận hành và ODD: hệ thống chạy đúng trong điều kiện nào"
+    summary: "ODD (Operational Design Domain) là phạm vi điều kiện mà hệ thống cam kết hoạt động đúng."
+  T03-106:
+    section: "Scope vận hành và ODD: hệ thống chạy đúng trong điều kiện nào"
+    summary: "Sự cố ngoài phạm vi (hỏng cảm biến, mất nguồn) cần backup plan; hết backup thì coi là tai nạn chứ không phải lỗi thiết kế."
+  T03-107:
+    section: "Scope vận hành và ODD: hệ thống chạy đúng trong điều kiện nào"
+    summary: "Định nghĩa scope rõ giúp trả lời khách hàng khi hệ thống chạy ngoài điều kiện đã cảnh báo trước."
+  T03-109:
+    section: "Scope vận hành và ODD: hệ thống chạy đúng trong điều kiện nào"
+    summary: "Thu hẹp scope càng hẹp càng tốt; chatbot có thể cảnh báo rồi chặn dần người hỏi ngoài phạm vi."
+
+  # --- Day 1 · Nền tảng LLM (transcript-04) ----------------------------------
+  T04-051:
+    section: "Mổ xẻ mô hình ngôn ngữ lớn: dự đoán token và context"
+    summary: "Context là toàn bộ thông tin mô hình tiêu thụ trong một lần; context window là giới hạn của một lượt, ví von như mặt bàn làm việc."
+  T04-052:
+    section: "Mổ xẻ mô hình ngôn ngữ lớn: dự đoán token và context"
+    summary: "Context rot: càng nhồi nhiều ngữ cảnh thì mô hình càng dễ quên đoạn đầu — context lớn không đồng nghĩa với tốt hơn."
+  T04-070:
+    section: "Thí nghiệm bàn cờ, giới hạn kiến thức và các mức tiếp cận mô hình"
+    summary: "Công cụ trực quan hoá Transformer và các tham số cần hiểu khi gọi API: temperature, top-k, top-p."
+  T04-071:
+    section: "Thí nghiệm bàn cờ, giới hạn kiến thức và các mức tiếp cận mô hình"
+    summary: "Top-k và top-p khoanh vùng tập token được phép chọn: tăng lên là mở rộng không gian lựa chọn, giảm xuống là thu hẹp."
+  T04-072:
+    section: "Temperature và top-k/top-p"
+    summary: "Temperature bằng 0 thì luôn lấy token xác suất cao nhất; tăng temperature thì kết quả ngẫu nhiên và sáng tạo hơn."
+
+  # --- Day 2 · Bài toán, đánh giá & dữ liệu (transcript-05) -------------------
+  T05-137:
+    section: "Ba mức độ giải pháp: script — LLM feature — agent"
+    summary: "Mức 1 — script theo luật: dùng khi đầu vào ổn định và logic rất rõ ràng."
+  T05-138:
+    section: "Ba mức độ giải pháp: script — LLM feature — agent"
+    summary: "Mức 2 — tính năng dựa trên LLM: đầu vào có biến động, cần metric đo được, guardrail và người review."
+  T05-139:
+    section: "Ba mức độ giải pháp: script — LLM feature — agent"
+    summary: "Mức 3 — agent: nhiều bước, nhiều tool, trạng thái thay đổi liên tục và cần ra quyết định."
+  T05-143:
+    section: "Problem statement"
+    summary: "Problem statement là viết lại vấn đề để người khác hiểu — kỹ năng quan trọng bất kể sau này làm vị trí nào."
+  T05-145:
+    section: "Problem statement"
+    summary: "Khung problem statement: actor, workflow hiện tại, điểm nghẽn, tác động, chỉ số thành công và giới hạn vận hành."
+  T05-146:
+    section: "Problem statement"
+    summary: "Bốn lỗi hay gặp khi viết: mặc định phải dùng agent, không có thước đo, không rõ ranh giới vận hành, scope quá rộng."
+
+  # --- Day 1 · Transformer & giới hạn của LLM (transcript-06) -----------------
+  T06-138:
+    section: "Vì sao có hallucination — bias dữ liệu và quá trình huấn luyện"
+    summary: "LLM không bao giờ đúng 100%; dữ liệu trên internet vốn đã mang thiên lệch nên mô hình có thể bịa (hallucination)."
+  T06-139:
+    section: "Vì sao có hallucination — bias dữ liệu và quá trình huấn luyện"
+    summary: "Qua fine-tune và học tăng cường vẫn còn thiên lệch của người chấm; RAG là cách tăng cường dữ liệu và bắt trả lời kèm trích dẫn."
+  T06-147:
+    section: "Giới hạn của LLM: knowledge cutoff, hallucination, context window"
+    summary: "Knowledge cutoff: mô hình chỉ biết dữ liệu tới thời điểm huấn luyện, muốn thông tin mới phải gắn thêm công cụ tra cứu."
+  T06-149:
+    section: "Giới hạn của LLM: knowledge cutoff, hallucination, context window"
+    summary: "Context window là giới hạn còn lại: mô hình chỉ nhìn được một lượng token nhất định cùng lúc."
+
+outside_terms:
+  react: [T04-073]
+  bert: []
+  decoder-only: [T06-075]
+  decoder only: [T06-075]
+  encoder-only: [T06-075]
+  encoder-decoder: [T06-075]
+  tiktoken: []
+  phobert: [T06-160]
+  multi-query: []
+  positional encoding: []
+  agent loop: [T04-073]
+  tool call: [T04-073]
+  function call: [T04-073]
+  rag: []
+  lora: []
+  fine-tune: []
+  finetune: []
+  fine tuning: []
+  diffusion: []
+  cnn: []

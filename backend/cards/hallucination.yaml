@@ -1,0 +1,57 @@
+id: hallucination
+term: Hallucination
+vi_name: ảo giác của mô hình
+lesson_id: day01-foundation-b
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [hallucination, ảo giác, bịa, trả lời sai, knowledge cutoff, giới hạn của llm]
+prerequisites: [token]
+required_terms: [xác suất, trích dẫn, giới hạn]
+
+core_claims:
+  - id: C1
+    text: "Mô hình chạy theo <b>xác suất</b> nên không bao giờ đúng 100%; dữ liệu huấn luyện vốn đã mang thiên lệch nên nó có thể bịa ra thông tin nghe rất hợp lý."
+    src: [T06-138]
+  - id: C2
+    text: "Cách giảm ảo giác trong sản phẩm là tăng cường dữ liệu đúng và bắt mô hình trả lời kèm <b>trích dẫn</b> nguồn."
+    src: [T06-139]
+  - id: C3
+    text: "Hai <b>giới hạn</b> đi kèm: knowledge cutoff — chỉ biết dữ liệu tới lúc huấn luyện, và cửa sổ ngữ cảnh — chỉ nhìn được một lượng token cùng lúc."
+    src: [T06-147, T06-149]
+
+approved_analogies:
+  - id: hoc_gia_trong_buong
+    text: "Giống một học giả uyên bác nhưng ngồi trong buồng kín: chỉ biết những gì đã đọc trước đó và chỉ nhìn được số sách bày ra trước mặt."
+    src: [T06-149]
+
+analogy_limits:
+  - "Ví dụ học giả không giải thích được vì sao mô hình lại bịa ra nội dung nghe hợp lý."
+
+misconceptions:
+  - id: M1
+    pattern: "mo hinh khong bao gio sai"
+    text: "Mô hình lớn thì không bao giờ sai"
+    fix: "Không có mô hình nào đúng 100%; đó là lý do phải có bước kiểm tra và trích dẫn nguồn."
+    src: [T06-138]
+  - id: M2
+    pattern: "biet ca thong tin moi nhat"
+    text: "Mô hình luôn biết thông tin mới nhất"
+    fix: "Mô hình bị chặn ở thời điểm huấn luyện; muốn tin mới phải gắn thêm công cụ tra cứu."
+    src: [T06-147]
+
+outside_lesson_notes:
+  - "Cách đo tỉ lệ ảo giác bằng benchmark cụ thể không nằm trong buổi này."
+
+primer:
+  html: "<b>Hallucination</b> là khi mô hình trả lời trôi chảy nhưng nội dung sai — hệ quả của việc nó dự đoán theo xác suất."
+  src: [T06-138]
+
+checks:
+  - id: HL-Q1
+    question: "Cách nào giúp giảm ảo giác trong một sản phẩm AI?"
+    options:
+      - { k: A, text: "Cho mô hình đọc tài liệu đúng và bắt trả lời kèm trích dẫn", correct: true }
+      - { k: B, text: "Tin rằng mô hình lớn thì không sai", misconception: M1 }
+      - { k: C, text: "Tăng temperature lên tối đa" }
+    src: [T06-139]

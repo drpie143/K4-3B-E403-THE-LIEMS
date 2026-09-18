@@ -1,0 +1,20 @@
+# Thư viện tối thiểu để chạy backend trên Render (gói free: 512 MB RAM).
+#
+# Khác requirements.txt ở hai chỗ:
+#   1. Không có sentence-transformers + torch (~2 GB) — vượt giới hạn gói free.
+#      Thiếu gói này thì vector search trên Supabase tự tắt, hệ thống chạy tiếp bằng
+#      BM25 + vector cục bộ (xem app/retrieval.py · _load_embedder).
+#   2. Không có pytest và các SDK provider không dùng tới.
+#
+# Máy cá nhân vẫn cài requirements.txt để có đủ hybrid search.
+
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+pydantic==2.13.5
+PyYAML==6.0.3
+httpx==0.28.1
+
+# Chỉ giữ SDK của provider đang dùng (LLM_PROVIDER). Đổi provider thì mở dòng tương ứng.
+openai==3.14.1
+# anthropic==1.6.0
+# google-genai==2.24.0

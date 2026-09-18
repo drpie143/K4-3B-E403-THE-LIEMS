@@ -1,0 +1,69 @@
+# Backend (FastAPI) trên Render — Blueprint.
+# Dùng: Render Dashboard → New → Blueprint → chọn repo này.
+# Các key bí mật (sync: false) phải tự điền trong Dashboard, KHÔNG viết vào file này.
+services:
+  - type: web
+    name: vlearn-tutor-api
+    runtime: python
+    plan: free
+    region: singapore          # gần Việt Nam nhất → bớt độ trễ mỗi lượt hỏi
+    rootDir: backend
+    buildCommand: pip install -r requirements-deploy.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.10"
+
+      # --- Mô hình ngôn ngữ ---
+      - key: LLM_PROVIDER
+        value: openai
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+      - key: LLM_TIMEOUT
+        value: "25"
+      - key: OPENAI_API_KEY
+        sync: false            # điền trong Dashboard → Environment
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+
+      # --- Tìm nguồn ---
+      # Gói deploy không cài sentence-transformers/torch (quá nặng cho gói free),
+      # nên vector search trên Supabase tự tắt và hệ thống chạy BM25 + vector cục bộ.
+      - key: RETRIEVAL_MODE
+        value: bm25
+      - key: DENSE_TIMEOUT
+        value: "4"
+
+      # --- Supabase: nguồn bài giảng + hồ sơ + tài khoản khi chạy trên Render ---
+      # Máy Render không có data/chunks.local.json (đã gitignore), nên bảng
+      # lecture_chunks trên Supabase là nguồn nội dung bài giảng. Chưa cấu hình thì
+      # trang vẫn chạy nhưng chỉ hiện tóm tắt trong cards/_sources.yaml.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+
+      # --- Miền của frontend trên Vercel (ngăn cách bằng dấu phẩy) ---
+      # Bỏ qua được nếu dùng rewrites trong vercel.json (khi đó trình duyệt thấy cùng origin).
+      - key: ALLOWED_ORIGINS
+        sync: false
+
+      # --- Tốc độ: xem README §8 ---
+      - key: USE_JUDGE
+        value: "1"
+      - key: JUDGE_ONLY_WHEN_NOVEL
+        value: "1"
+      - key: SPECULATIVE_EXPLAIN
+        value: "1"
+
+      # Ổ đĩa gói free không giữ lại sau mỗi lần deploy — đặt DB và vết chạy vào /tmp
+      # để tránh lỗi ghi file. Hồ sơ và bộ nhớ dài hạn vẫn nằm trên Supabase.
+      - key: DB_PATH
+        value: /tmp/p3.db
+      - key: TRACE_DIR
+        value: /tmp/traces
+      - key: CACHE_DIR
+        value: /tmp/cache

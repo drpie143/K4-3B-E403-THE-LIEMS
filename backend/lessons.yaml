@@ -1,0 +1,150 @@
+# Danh mục 6 buổi học của khoá (chỉ metadata do nhóm tự viết: tên buổi, tên mục,
+# mã đoạn). NGUYÊN VĂN bài giảng nằm ở codebase/data/chunks.local.json hoặc bảng
+# lecture_chunks trên Supabase — cả hai đều KHÔNG commit.
+#
+# Sinh lại phần thân bài (đọc được trên giao diện) bằng:
+#   python codebase/scripts/build_lessons.py --pack "<đường dẫn>/data/vlearn-pack"
+
+lessons:
+  day01-foundation-a:
+    order: 1
+    title: "Nền tảng AI và mô hình ngôn ngữ lớn"
+    day: "Day 1 · Buổi 1"
+    subtitle: "Từ lịch sử AI đến cách LLM đoán token, context và cách gọi API"
+    transcript_files: [transcript-04-clean.md]
+    concepts: [context_window, temperature, multi_head]
+    tags: [foundation, llm]
+
+  day01-foundation-b:
+    order: 2
+    title: "Transformer và cơ chế self-attention"
+    day: "Day 1 · Buổi 2"
+    subtitle: "Trái tim của LLM: token → vector → self-attention → dự đoán token kế tiếp"
+    transcript_files: [transcript-06-clean.md]
+    concepts: [self_attention, transformer, token, vector, similarity, hallucination]
+    tags: [foundation, transformer]
+
+  day02-problem-scoping:
+    order: 3
+    title: "Xác định bài toán kinh doanh cho AI"
+    day: "Day 2 · Sáng"
+    subtitle: "Từ yêu cầu mơ hồ đến vấn đề thật: Double Diamond, Five Whys, ma trận tác động – nỗ lực"
+    transcript_files: [transcript-01-clean.md]
+    concepts: [double_diamond, impact_effort]
+    tags: [product, discovery]
+
+  day02-metrics-automation:
+    order: 4
+    title: "Chỉ số thành công và mức tự động hoá"
+    day: "Day 2 · Sáng (phần sau)"
+    subtitle: "North Star Metric, A/B test, automation và augmentation"
+    transcript_files: [transcript-02-clean.md]
+    concepts: [north_star, automation_augmentation]
+    tags: [product, metrics]
+
+  day02-constraints:
+    order: 5
+    title: "Soi bài toán, tự động hoá và ràng buộc kỹ thuật"
+    day: "Day 2 · Chiều"
+    subtitle: "Khi nào LLM không đủ, tool calling, RAG nội bộ và phạm vi vận hành (ODD)"
+    transcript_files: [transcript-03-clean.md]
+    concepts: [tool_calling, odd_scope]
+    tags: [engineering, risk]
+
+  day02-eval-data:
+    order: 6
+    title: "Bài toán, đánh giá và dữ liệu"
+    day: "Day 2 · Buổi tổng hợp"
+    subtitle: "Vòng đời sản phẩm AI, problem statement và ba mức giải pháp"
+    transcript_files: [transcript-05-clean.md]
+    concepts: [problem_statement, solution_levels]
+    tags: [product, evaluation]
+
+# Mục (section) của từng buổi — tên mục lấy theo tiêu đề trong transcript,
+# phần thân được nạp lúc chạy từ dữ liệu cục bộ / Supabase.
+sections:
+  day01-foundation-a:
+    - {id: s1, title: "Chào lớp và giới thiệu giảng viên", from: T04-001, to: T04-011}
+    - {id: s2, title: "Nội dung ngày học và bức tranh tổng quan về AI", from: T04-013, to: T04-015}
+    - {id: s3, title: "Lịch sử AI: Turing test và hai mùa đông", from: T04-016, to: T04-029}
+    - {id: s4, title: "Deep learning và sức mạnh của dữ liệu", from: T04-030, to: T04-033}
+    - {id: s5, title: "AlphaGo và kiến trúc Transformer", from: T04-034, to: T04-040}
+    - {id: s6, title: "Cuộc đua AI sau ChatGPT", from: T04-041, to: T04-045}
+    - {id: s7, title: "Mổ xẻ mô hình ngôn ngữ lớn: dự đoán token và context", from: T04-046, to: T04-052}
+    - {id: s8, title: "Attention, multi-head và bài học quản lý context", from: T04-053, to: T04-057-2}
+    - {id: s9, title: "Tham số, RLHF và ngành gán nhãn dữ liệu", from: T04-058, to: T04-063}
+    - {id: s10, title: "Thí nghiệm bàn cờ, giới hạn kiến thức và các mức tiếp cận mô hình", from: T04-064, to: T04-071}
+    - {id: s11, title: "Temperature và top-k/top-p", from: T04-072, to: T04-072}
+    - {id: s12, title: "Từ mô hình đến AI agent", from: T04-073, to: T04-073}
+    - {id: s13, title: "Các lớp bao quanh LLM và tầm quan trọng của evaluation", from: T04-074, to: T04-074}
+    - {id: s14, title: "Bức tranh thị trường mô hình và tốc độ thay đổi", from: T04-076, to: T04-078}
+    - {id: s15, title: "Chọn mô hình phù hợp với công việc", from: T04-084, to: T04-086}
+    - {id: s16, title: "Cơ bản về gọi API mô hình LLM", from: T04-087, to: T04-089}
+    - {id: s17, title: "Tóm tắt buổi học", from: T04-091, to: T04-098}
+
+  day01-foundation-b:
+    - {id: s1, title: "Giới thiệu giảng viên và khảo sát làm quen lớp", from: T06-001, to: T06-020}
+    - {id: s2, title: "Nội dung buổi học", from: T06-022, to: T06-022}
+    - {id: s3, title: "AI, machine learning, deep learning và foundation model", from: T06-023, to: T06-045-2}
+    - {id: s4, title: "Ba nhóm AI và lịch sử phát triển", from: T06-046, to: T06-059-4}
+    - {id: s5, title: "Vì sao 2025-2026 là bước ngoặt", from: T06-060, to: T06-061}
+    - {id: s6, title: "LLM: encoder–decoder, transformer và attention", from: T06-075, to: T06-088}
+    - {id: s7, title: "Transformer — trái tim của LLM", from: T06-125, to: T06-128}
+    - {id: s8, title: "Self-attention: ví dụ con mèo ngồi trên bàn và công thức Q–K–V", from: T06-129, to: T06-132}
+    - {id: s9, title: "Token và cơ chế dự đoán next token", from: T06-134, to: T06-137}
+    - {id: s10, title: "Vì sao có hallucination — bias dữ liệu và quá trình huấn luyện", from: T06-138, to: T06-140}
+    - {id: s11, title: "LLM được tạo ra như thế nào — ba giai đoạn huấn luyện", from: T06-141, to: T06-146}
+    - {id: s12, title: "Giới hạn của LLM: knowledge cutoff, hallucination, context window", from: T06-147, to: T06-150}
+    - {id: s13, title: "Token economy và chi phí API", from: T06-154, to: T06-156}
+    - {id: s14, title: "Tổng kết buổi học và lab self-attention", from: T06-158, to: T06-160}
+
+  day02-problem-scoping:
+    - {id: s1, title: "Kỹ năng xác định bài toán từ yêu cầu mơ hồ", from: T01-001, to: T01-006}
+    - {id: s2, title: "Product manager, project manager và văn hoá làm product", from: T01-007, to: T01-016-2}
+    - {id: s3, title: "Phát triển sản phẩm AI có gì khác", from: T01-018, to: T01-029}
+    - {id: s4, title: "Từ đề bài mơ hồ đến vấn đề thực sự", from: T01-030, to: T01-033}
+    - {id: s5, title: "Bài tập: bài toán trợ giảng cho lớp 1000 học viên", from: T01-034, to: T01-043}
+    - {id: s6, title: "Tri thức ẩn của chuyên gia và việc tìm đúng vấn đề", from: T01-044, to: T01-047}
+    - {id: s7, title: "Mô hình Double Diamond: làm đúng cái sai hay làm sai cái đúng?", from: T01-049, to: T01-060}
+    - {id: s8, title: "First Principle Thinking", from: T01-062, to: T01-068}
+    - {id: s9, title: "Phân kỳ – hội tụ và các kỹ thuật khám phá vấn đề", from: T01-069, to: T01-073}
+    - {id: s10, title: "Ma trận tác động – nỗ lực (impact-effort matrix)", from: T01-074, to: T01-080}
+    - {id: s11, title: "Vòng lặp HCD và bài tập cá nhân", from: T01-081, to: T01-088}
+
+  day02-metrics-automation:
+    - {id: s1, title: "Nhận xét bài tập ma trận tác động – nỗ lực", from: T02-001, to: T02-008}
+    - {id: s2, title: "Từ quick win đến phát biểu bài toán", from: T02-009, to: T02-018}
+    - {id: s3, title: "Chỉ số thành công và đo lường sản phẩm", from: T02-019, to: T02-030}
+    - {id: s4, title: "Automation và augmentation: chọn mức độ tự động hoá", from: T02-031, to: T02-034}
+    - {id: s5, title: "Ba cấp độ kỹ thuật: rule-based, workflow, agent", from: T02-035, to: T02-043}
+
+  day02-constraints:
+    - {id: s1, title: "Giới thiệu giảng viên và định hướng khoá học", from: T03-001, to: T03-013}
+    - {id: s2, title: "Ba track nghề nghiệp: AI Engineer, MLOps và AI PM", from: T03-014, to: T03-022}
+    - {id: s3, title: "Bài toán nào dùng được LLM: case lập kế hoạch du lịch", from: T03-024, to: T03-033}
+    - {id: s4, title: "Giới hạn của LLM, tool calling và RAG", from: T03-034, to: T03-036}
+    - {id: s5, title: "Chọn dự án: giá trị cạnh tranh, metric và mindset đi làm", from: T03-037, to: T03-045}
+    - {id: s6, title: "Bài toán sinh đề toán tự động — ý tưởng từ các nhóm", from: T03-046, to: T03-073}
+    - {id: s7, title: "Lời giải: tách phần deterministic ra khỏi LLM", from: T03-074, to: T03-080}
+    - {id: s8, title: "Chi phí vận hành: dựng con số trước khi trình sếp", from: T03-083, to: T03-087}
+    - {id: s9, title: "Hậu quả khi sai sót, bảo mật và đánh giá bằng AI", from: T03-088, to: T03-104}
+    - {id: s10, title: "Scope vận hành và ODD: hệ thống chạy đúng trong điều kiện nào", from: T03-105, to: T03-111}
+    - {id: s11, title: "Câu chuyện xe tự hành Cruise và rủi ro một phần vạn", from: T03-112, to: T03-118-2}
+    - {id: s12, title: "Fine-tuning hay RAG — và cách thuyết phục sếp", from: T03-119, to: T03-122-2}
+    - {id: s13, title: "Hệ thống nhiều thành phần: khoanh vùng lỗi và UI/UX", from: T03-123, to: T03-130}
+    - {id: s14, title: "Workflow pattern: chaining, routing, parallel và agent", from: T03-131, to: T03-137}
+    - {id: s15, title: "Bảo mật dữ liệu nhạy cảm và test hệ thống AI", from: T03-138, to: T03-153}
+
+  day02-eval-data:
+    - {id: s1, title: "Chọn làm cái gì và không làm cái gì với AI", from: T05-001, to: T05-008}
+    - {id: s2, title: "Workflow là gì", from: T05-010, to: T05-018}
+    - {id: s3, title: "Bức tranh chung và quiz hệ sinh thái Vingroup", from: T05-019, to: T05-033}
+    - {id: s4, title: "AI tạo giá trị ở đâu — bốn dấu hiệu đốt tiền sai chỗ", from: T05-035, to: T05-052}
+    - {id: s5, title: "AI product life cycle", from: T05-053, to: T05-069}
+    - {id: s6, title: "Sáu giai đoạn phát triển và problem scoping", from: T05-070, to: T05-083}
+    - {id: s7, title: "Data, baseline, build–eval và bốn bài học kỹ thuật", from: T05-084, to: T05-094}
+    - {id: s8, title: "Chọn kiến trúc cho giải pháp AI: các thành phần và rủi ro", from: T05-103, to: T05-116}
+    - {id: s9, title: "Ba mức độ giải pháp: script — LLM feature — agent", from: T05-137, to: T05-142}
+    - {id: s10, title: "Problem statement", from: T05-143, to: T05-146}
+    - {id: s11, title: "Eval plan và stakeholder", from: T05-147, to: T05-151}
+    - {id: s12, title: "Thông điệp kết buổi", from: T05-152, to: T05-154}

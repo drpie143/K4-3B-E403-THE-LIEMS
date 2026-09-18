@@ -1,0 +1,52 @@
+id: problem_statement
+term: Problem statement
+vi_name: phát biểu bài toán
+lesson_id: day02-eval-data
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [problem statement, phát biểu bài toán, phát biểu vấn đề, mô tả bài toán, khung bài toán]
+prerequisites: []
+required_terms: [workflow, điểm nghẽn, chỉ số thành công]
+
+core_claims:
+  - id: C1
+    text: "<b>Problem statement</b> là viết lại vấn đề sao cho người khác hiểu được — gặp vấn đề là một chuyện, diễn đạt lại được là chuyện khác."
+    src: [T05-143]
+  - id: C2
+    text: "Khung gồm sáu phần: ai là người thao tác, <b>workflow</b> hiện tại, <b>điểm nghẽn</b>, tác động, <b>chỉ số thành công</b> và giới hạn vận hành."
+    src: [T05-145]
+  - id: C3
+    text: "Bốn lỗi hay gặp: mặc định phải dùng agent, không có thước đo, không rõ ranh giới vận hành, và scope quá rộng."
+    src: [T05-146]
+
+approved_analogies: []
+analogy_limits: []
+
+misconceptions:
+  - id: M1
+    pattern: "chi can mo ta giai phap"
+    text: "Chỉ cần mô tả giải pháp là đủ, không cần mô tả vấn đề"
+    fix: "Không có phần vấn đề và thước đo thì người đọc không biết vì sao nên làm và khi nào coi là xong."
+    src: [T05-146]
+  - id: M2
+    pattern: "khong can chi so"
+    text: "Không cần chỉ số thành công, cứ làm rồi tính sau"
+    fix: "Thiếu chỉ số thành công thì không biết đi đúng hay sai hướng."
+    src: [T05-145]
+
+outside_lesson_notes:
+  - "Các mẫu viết PRD hay user story không nằm trong buổi này."
+
+primer:
+  html: "<b>Phát biểu bài toán</b> là bản mô tả ngắn cho người khác hiểu: ai đang vướng ở đâu, tốn bao nhiêu, và thế nào là giải xong."
+  src: [T05-143]
+
+checks:
+  - id: PS-Q1
+    question: "Phần nào bắt buộc phải có trong một problem statement?"
+    options:
+      - { k: A, text: "Chỉ số thành công — thế nào thì coi là giải xong", correct: true }
+      - { k: B, text: "Tên mô hình AI sẽ dùng", misconception: M1 }
+      - { k: C, text: "Ngôn ngữ lập trình của nhóm" }
+    src: [T05-145]
