@@ -1,0 +1,16 @@
+# Thư viện backend — pin đúng phiên bản nhóm đang chạy (Python 3.11).
+# Cài: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+pydantic==2.13.5
+PyYAML==6.0.3
+httpx==0.28.1
+
+# Test (dùng FakeLLM, không cần API key)
+pytest==9.1.1
+
+# Provider — chỉ cần gói của provider đang dùng trong .env (LLM_PROVIDER)
+openai==3.14.1
+anthropic==1.6.0
+google-genai==2.24.0

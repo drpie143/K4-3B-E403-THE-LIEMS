@@ -1,0 +1,5 @@
+# Toàn bộ thư viện Python của dự án nằm ở backend.
+# Cài nhanh từ gốc repo:
+#   python3 -m venv codebase/backend/.venv
+#   codebase/backend/.venv/bin/pip install -r requirements.txt
+-r codebase/backend/requirements.txt

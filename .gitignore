@@ -1,0 +1,28 @@
+# Dữ liệu được cấp — không bao giờ commit
+*.local.*
+codebase/data/
+data/
+*.csv
+!codebase/eval/golden_set.csv
+*.pdf
+
+# Backend: DB, vết, cache, môi trường
+codebase/backend/.venv/
+codebase/backend/p3.db
+codebase/backend/traces/
+codebase/backend/.cache/
+codebase/backend/cards/drafts/
+*.db
+*.jsonl
+
+# Bí mật
+.env
+.env.*
+!.env.example
+
+# Rác
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+.DS_Store

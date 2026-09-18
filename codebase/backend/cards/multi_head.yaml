@@ -1,0 +1,44 @@
+id: multi_head
+term: Multi-head attention
+vi_name: nhiều “đầu” chú ý
+lesson_id: day01-self-attention
+reviewed: true
+reviewed_by: "[tên TA/nhóm]"
+aliases: [multi-head, multi head, nhiều đầu, nhiều con mắt]
+prerequisites: [self_attention]
+required_terms: [attention]
+core_claims:
+  - id: C1
+    text: Thay vì một “con mắt”, mô hình dùng nhiều con mắt cùng nhìn, mỗi con mắt bắt một đặc trưng khác nhau, rồi tổng hợp.
+    src: [T04-056]
+approved_analogies:
+  - id: thay_boi
+    title: Thầy bói xem voi
+    text: "Mỗi thầy chỉ sờ một phần con voi; ghép nhiều góc nhìn lại thì không bỏ sót."
+    src: [T04-056]
+analogy_limits: []
+misconceptions: []
+outside_lesson_notes: []
+primer:
+  html: "<b>Multi-head attention</b>: nhiều “con mắt” attention cùng nhìn một câu, mỗi con mắt một đặc trưng."
+  src: [T04-056]
+checks:
+  - id: MH-Q1
+    question: "Multi-head attention khác attention một “con mắt” ở điểm nào?"
+    options:
+      - { k: A, text: "Nhiều con mắt cùng nhìn, mỗi con mắt một đặc trưng, rồi tổng hợp", correct: true }
+      - { k: B, text: "Đọc một từ nhiều lần" }
+      - { k: C, text: "Bỏ bớt token không quan trọng" }
+      - { k: D, text: "Chạy nhanh hơn vì chỉ nhìn từ bên cạnh" }
+    src: [T04-056]
+templates:
+  first:
+    - t: p
+      html: "<b>Multi-head attention</b>: thay vì một “con mắt” <b>attention</b>, mô hình dùng nhiều con mắt cùng nhìn câu; mỗi con mắt bắt một đặc trưng khác nhau rồi tổng hợp lại."
+      src: [T04-056]
+      claims: [C1]
+    - t: analogy
+      title: Ví dụ giảng viên dùng
+      html: "Như chuyện <i>thầy bói xem voi</i>: mỗi thầy chỉ sờ một phần; ghép nhiều góc nhìn lại thì không bỏ sót."
+      src: [T04-056]
+      claims: []
