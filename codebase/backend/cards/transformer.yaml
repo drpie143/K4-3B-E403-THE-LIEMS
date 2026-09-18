@@ -1,0 +1,57 @@
+id: transformer
+term: Transformer
+vi_name: kiến trúc Transformer
+lesson_id: day01-foundation-b
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [transformer, kiến trúc transformer, kien truc transformer, trái tim của llm, attention is all you need]
+prerequisites: [token, vector]
+required_terms: [token, vector, song song]
+
+core_claims:
+  - id: C1
+    text: "Luồng của <b>Transformer</b>: văn bản được tách thành <b>token</b>, mỗi token thành <b>vector</b>, rồi self-attention, feed forward và cuối cùng là đoán token kế tiếp."
+    src: [T06-126]
+  - id: C2
+    text: "Khác các kiến trúc cũ như RNN hay LSTM đọc lần lượt, Transformer xử lý <b>song song</b>: mọi token nhìn nhau cùng lúc nên câu dài không bị quên đoạn đầu."
+    src: [T06-127]
+  - id: C3
+    text: "Token được biểu diễn thành vector giống như toạ độ GPS định danh một vị trí, nhờ vậy mô hình mới tính được mức tương đồng giữa các token."
+    src: [T06-128]
+
+approved_analogies:
+  - id: gps
+    text: "Vector giống latitude–longitude của GPS: đưa mỗi token về một toạ độ trong không gian toán học thì mới tính toán được."
+    src: [T06-128]
+
+analogy_limits:
+  - "GPS chỉ có hai chiều còn vector của mô hình có hàng trăm đến hàng nghìn chiều."
+
+misconceptions:
+  - id: M1
+    pattern: "doc lan luot tung tu"
+    text: "Transformer đọc lần lượt từng từ như mô hình cũ"
+    fix: "Đó là cách của RNN/LSTM; Transformer cho các token nhìn nhau song song."
+    src: [T06-127]
+  - id: M2
+    pattern: "transformer hieu nghia nhu nguoi"
+    text: "Transformer hiểu nghĩa câu như con người"
+    fix: "Nó biểu diễn token thành vector rồi tính mức tương đồng để đoán token kế tiếp, không phải hiểu như người."
+    src: [T06-128]
+
+outside_lesson_notes:
+  - "Chi tiết công thức nhân ma trận, hệ số căn dₖ và positional encoding không nằm trong buổi này."
+
+primer:
+  html: "<b>Transformer</b> là kiến trúc nằm dưới các mô hình ngôn ngữ lớn: token → vector → self-attention → dự đoán token kế tiếp."
+  src: [T06-126]
+
+checks:
+  - id: TF-Q1
+    question: "Điểm khác biệt chính của Transformer so với RNN/LSTM là gì?"
+    options:
+      - { k: A, text: "Các token được xử lý song song và nhìn lẫn nhau", correct: true }
+      - { k: B, text: "Đọc lần lượt từng từ từ trái sang phải", misconception: M1 }
+      - { k: C, text: "Không cần dữ liệu huấn luyện" }
+    src: [T06-127]

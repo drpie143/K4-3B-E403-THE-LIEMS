@@ -7,10 +7,12 @@
 (function (root) {
   "use strict";
 
+  // Buổi học mặc định khi mở OFFLINE (không có backend). Khi chạy qua backend,
+  // js/lessons.js sẽ nạp đúng 6 buổi từ /api/lessons và ghi đè phần này.
   const LESSON = {
-    course: "L3-L4 · Khóa 4 Phase 1",
-    day: "Bài 1 · Day01",
-    title: "Self-attention: ví dụ “con mèo ngồi trên bàn” và công thức Q–K–V",
+    course: "VLearn · Khoá 4 Phase 1",
+    day: "Bài 2 · Day 1",
+    title: "Transformer và cơ chế self-attention",
     section: "Self-attention",
     pageConcept: "self_attention",
   };

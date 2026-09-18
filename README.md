@@ -26,6 +26,7 @@ Nhóm **THE LIEMS** · Lớp 3B · Phòng E403 · Mini Hackathon AI, Batch 04
 - **Bằng chứng (chatlog K4, 3.097 lượt):** 106 lượt / 49 học viên nói rõ chưa hiểu; tutor vẫn dùng `review_concept` **86/106 lần**, chỉ **1 lần** hỏi lại; trung vị câu trả lời **995 ký tự**. Case gốc: **T10728**.
 - **Lát cắt một câu:** *Một học viên vừa đọc lời giải thích mà vẫn chưa hiểu · cần hiểu khái niệm đó · **AI chọn mức và kiểu giải thích** (dựa trên Sổ tay học tập, hỏi nhanh khi chưa chắc) · học viên nhận lời giải thích lại đúng mức, có nguồn, và trả lời đúng câu kiểm tra.*
 - **Mức tự động:** Conditional. Thẻ khái niệm do TA/giảng viên duyệt một lần (Augment).
+- **Phạm vi nội dung:** 6 buổi học của khoá (transcript 01–06), xem [`codebase/backend/lessons.yaml`](codebase/backend/lessons.yaml). Mỗi buổi có thẻ khái niệm riêng; trợ giảng chỉ trả lời trong phạm vi buổi đang mở.
 - Chi tiết: [`spec.md`](spec.md) · thiết kế: [`docs/`](docs/)
 
 ## 3. Trạng thái
@@ -35,6 +36,7 @@ Nhóm **THE LIEMS** · Lớp 3B · Phòng E403 · Mini Hackathon AI, Batch 04
 | CP1 | Canvas + repo | Xong |
 | CP2 | Mock bấm được, 4 đường trải nghiệm | Xong — `codebase/mock/` |
 | CP3 | AI thật ở quyết định trung tâm + golden set + bảng đo | Xong — `codebase/backend/`, `codebase/eval/`; vòng 4: **22/23 test (96%)**, 0 case dùng mẫu dự phòng, baseline 3/21 |
+| CP3+ | Mở rộng **6 buổi học** (17 thẻ khái niệm), **tài khoản học viên**, bộ nhớ dài hạn trên Supabase | Xong — `lessons.yaml`, `app/auth.py`, `app/memory.py`; 66 test backend + 17 test giao diện |
 | CP4 | Chốt `spec.md` + quality bar | Còn: điền khảo sát, chấm D6, chốt bar |
 | CP5 | Slide PDF + video dự phòng | Chưa |
 
@@ -120,14 +122,58 @@ codebase\backend\.venv\Scripts\python.exe codebase\scripts\build_local_data.py -
 codebase\backend\.venv\Scripts\python.exe codebase\scripts\build_index.py
 ```
 
+Dựng và kiểm tra **6 buổi học** (đoạn nào thuộc mục nào, thẻ khái niệm có trích đúng nguồn trong buổi không):
+
+```bash
+codebase/backend/.venv/bin/python codebase/scripts/build_lessons.py --pack "<đường dẫn>/data/vlearn-pack"
+# chỉ kiểm tra, không sinh lại dữ liệu:
+codebase/backend/.venv/bin/python codebase/scripts/build_lessons.py --check
+```
+
 Dấu hiệu đang dùng dữ liệu thật:
 
 | Kiểm ở đâu | Phải thấy |
 |---|---|
-| `build_index.py` | dòng đầu `Chế độ: local · 260 đoạn` |
-| `curl -s localhost:8000/health` (Windows: `curl.exe`) | `"retrieval_mode":"local","passages":260` |
+| `build_lessons.py --check` | 6 dòng buổi học, cột nguồn là `local` |
+| `curl -s localhost:8000/api/lessons` | 6 buổi, mỗi buổi `"source":"local"` (hoặc `supabase`) |
+| `curl -s localhost:8000/health` (Windows: `curl.exe`) | `"retrieval_mode":"local","passages":384` |
+| Giao diện | cột trái hiện 6 buổi; đầu bài có nhãn xanh **“Dữ liệu bài giảng trên máy”** |
 | Giao diện | bấm mã nguồn `[T06-131]` dưới câu trả lời → hiện **nguyên văn lời giảng**, không phải tóm tắt |
 | Báo cáo eval | dòng `retrieval: local` ở đầu `eval/results/round*.md` |
+
+### 5.3b Tài khoản học viên và Supabase (điền key sau)
+
+Hồ sơ mức hiểu và bộ nhớ dài hạn được lưu **theo tài khoản**, nên mỗi người đăng nhập thấy đúng dữ liệu của mình.
+
+1. Mở Supabase → **SQL Editor** → dán toàn bộ [`codebase/backend/supabase_schema.sql`](codebase/backend/supabase_schema.sql) rồi chạy.
+   File này tạo: `lecture_chunks` (bài giảng + vector), `profiles`, `strategy_memory`, `settings`, `events`, `sessions`,
+   **`accounts` + `account_sessions`** (đăng nhập) và hàm `prune_learner_memory()` để bộ nhớ không phình.
+2. Điền hai dòng này vào `codebase/backend/.env` (chép từ `.env.example`, **không commit**):
+
+   ```env
+   SUPABASE_URL=https://<project>.supabase.co
+   SUPABASE_KEY=<service_role key>
+   ```
+
+3. Đẩy bài giảng lên Supabase (tuỳ chọn, khi muốn chạy không cần data pack trên máy):
+
+   ```bash
+   cd codebase/backend && .venv/bin/python ../scripts/sync_to_supabase.py
+   ```
+
+4. Trên giao diện: bấm avatar góc phải → **Đăng ký / Đăng nhập**. Sau khi đăng nhập, mọi câu hỏi, mức hiểu và
+   “cách giải thích đã hiệu quả” được ghi vào tài khoản đó.
+
+**Bộ nhớ dài hạn không phình** — ba lớp chặn (chỉnh trong `.env`):
+
+| Cơ chế | Mặc định | Ở đâu |
+|---|---|---|
+| Ghi trễ: gom nhiều lượt rồi mới đẩy lên Supabase | `MEMORY_FLUSH_EVERY=3` | `app/memory.py` |
+| Nén định kỳ: quên cách giải thích quá hạn, mỗi khái niệm giữ tối đa N cách, cắt nhật ký cũ | `MEMORY_COMPACT_EVERY=10`, `MEMORY_MAX_STRATEGIES=6`, `MEMORY_MAX_EVENTS=50` | `ProfileStore.compact()` |
+| Chặn phía CSDL | hàm `prune_learner_memory(user_id)` | `supabase_schema.sql` |
+
+Xem nhanh bộ nhớ đang chiếm bao nhiêu dòng: `SELECT * FROM learner_memory_size;` trong SQL Editor.
+Đẩy ngay phần đang chờ: `curl -X POST localhost:8000/api/memory/flush`.
 
 ### 5.4 Thử một lượt với AI thật (rẻ, in rõ lỗi)
 
@@ -208,12 +254,14 @@ K4-3B-E403-THE-LIEMS/
 ├── docs/                  # tài liệu thiết kế: pain point, workflow, mức tự động hoá, hạ tầng backend
 └── codebase/
     ├── README.md          # hướng dẫn chi tiết + kiến trúc + kịch bản demo
-    ├── mock/              # giao diện VLearn (HTML/CSS/JS thuần), chạy được cả khi không có backend
+    ├── mock/              # giao diện VLearn: index.html · js/lessons.js (6 buổi) · js/auth.js (tài khoản)
     ├── backend/           # FastAPI + agent (xem backend/README.md)
+    │                       #   lessons.yaml (danh mục 6 buổi) · cards/ (17 thẻ khái niệm)
+    │                       #   app/lessons.py · app/auth.py · app/memory.py · supabase_schema.sql
     ├── eval/              # golden_set.csv (35 case), run_eval.py, rubric.md, coverage.md,
     │                       #   results/ (bảng %), traces-sample/ (prompt + phản hồi thô, đã che nguyên văn)
-    ├── scripts/           # build_local_data · build_index · draft_cards · smoke_llm ·
-    │                       #   export_trace_sample · check_no_data
+    ├── scripts/           # build_local_data · build_lessons · build_index · sync_to_supabase ·
+    │                       #   draft_cards · smoke_llm · export_trace_sample · check_no_data
     └── tests/             # test logic của giao diện (Node)
 ```
 

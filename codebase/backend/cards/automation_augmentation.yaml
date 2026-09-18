@@ -1,0 +1,52 @@
+id: automation_augmentation
+term: Automation và augmentation
+vi_name: mức tự động hoá
+lesson_id: day02-metrics-automation
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [automation, augmentation, tự động hoá, tăng cường, human in the loop, mức tự động]
+prerequisites: []
+required_terms: [automation, augmentation, con người]
+
+core_claims:
+  - id: C1
+    text: "<b>Automation</b> là để máy tự làm thay; <b>augmentation</b> là AI hỗ trợ còn <b>con người</b> vẫn là người quyết định."
+    src: [T02-031]
+  - id: C2
+    text: "Hai mức này không phải hai thái cực mà là một phổ: ví dụ quy trình 10 bước mà AI làm 2 bước thì mức tự động mới khoảng 20%."
+    src: [T02-031, T02-033]
+  - id: C3
+    text: "Nên bắt đầu ở phía augmentation rồi tăng dần; việc mà sai sẽ gây hậu quả nghiêm trọng thì giữ gần phía augmentation."
+    src: [T02-033, T02-034]
+
+approved_analogies: []
+analogy_limits: []
+
+misconceptions:
+  - id: M1
+    pattern: "tu dong hoa 100% ngay"
+    text: "Nên tự động hoá 100% ngay từ đầu cho nhanh"
+    fix: "Bài giảng khuyên đi từ augmentation lên, vì giao toàn quyền cho AI ngay có thể tạo rủi ro rất lớn."
+    src: [T02-033]
+  - id: M2
+    pattern: "hai thai cuc"
+    text: "Chỉ có hai lựa chọn: hoặc tự động hoàn toàn, hoặc thủ công hoàn toàn"
+    fix: "Đây là một phổ; mức tự động tăng dần theo số bước mà AI được giao."
+    src: [T02-031]
+
+outside_lesson_notes:
+  - "Các khung phân mức tự động hoá của ngành xe (level 0–5) không nằm trong buổi này."
+
+primer:
+  html: "Khi đưa AI vào một quy trình, việc đầu tiên là chọn <b>mức tự động hoá</b>: AI làm thay (automation) hay AI hỗ trợ người (augmentation)."
+  src: [T02-031]
+
+checks:
+  - id: AA-Q1
+    question: "Một việc nếu làm sai sẽ gây hậu quả nghiêm trọng thì nên đặt ở đâu?"
+    options:
+      - { k: A, text: "Gần phía augmentation, giữ người trong vòng lặp", correct: true }
+      - { k: B, text: "Tự động hoá hoàn toàn cho nhanh", misconception: M1 }
+      - { k: C, text: "Không dùng AI trong mọi trường hợp" }
+    src: [T02-034]

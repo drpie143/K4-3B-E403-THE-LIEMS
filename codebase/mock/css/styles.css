@@ -350,3 +350,73 @@ details.trace summary { cursor: pointer; }
   .t-head .new .txt { display: none; }
   .ptable .muted { display: none; }
 }
+
+/* ==========================================================================
+   Danh sách 6 buổi học (cột trái) — dựng bởi js/lessons.js
+   ========================================================================== */
+.lesson-list { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px 10px; border-bottom: 1px solid var(--line); }
+.lesson-row {
+  display: flex; gap: 10px; align-items: flex-start; text-align: left;
+  padding: 8px 10px; border: 1px solid transparent; border-radius: 10px; background: transparent;
+}
+.lesson-row:hover { background: #fff; border-color: var(--line); }
+.lesson-row .num {
+  width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center;
+  font-size: 12px; font-weight: 600; background: #fff; border: 1px solid var(--blue-line); color: var(--navy);
+}
+.lesson-row .meta { display: grid; gap: 1px; min-width: 0; }
+.lesson-row .day { font-size: 12px; color: var(--muted); }
+.lesson-row .title { font-size: 14px; line-height: 1.35; }
+.lesson-row.active { background: var(--blue-soft); border-color: var(--blue-line); }
+.lesson-row.active .num { background: var(--navy); border-color: var(--navy); color: #fff; }
+.lesson-row.active .title { font-weight: 600; color: var(--navy); }
+.side-empty { padding: 12px; color: var(--muted); font-size: 14px; }
+
+/* Thân bài theo mục */
+.lesson-section { margin: 0 0 22px; scroll-margin-top: 12px; }
+.lesson-section h3 { margin: 18px 0 8px; font-size: 17px; color: var(--navy); }
+.lesson-section p { margin: 0 0 12px; }
+.concept-chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 4px; }
+.concept-chips .chip {
+  border: 1px solid var(--blue-line); background: var(--blue-soft); color: var(--navy);
+  border-radius: 999px; padding: 4px 12px; font-size: 13px;
+}
+.concept-chips .chip:hover { background: #fff; }
+.data-badge {
+  display: inline-block; margin: 8px 0 4px; font-size: 12.5px; padding: 3px 10px; border-radius: 999px;
+  background: var(--green-soft); color: var(--green); border: 1px solid #bfe3cd;
+}
+.data-badge.supabase { background: var(--blue-soft); color: var(--navy); border-color: var(--blue-line); }
+.data-badge.summary { background: var(--amber-soft); color: var(--amber); border-color: #f0d9b0; }
+
+/* ==========================================================================
+   Tài khoản: nút avatar, menu và form đăng nhập
+   ========================================================================== */
+.avatar { border: none; }
+.avatar.signed { background: var(--navy); color: #fff; }
+.account-menu {
+  position: absolute; top: 54px; right: 14px; z-index: 40; width: 280px; display: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: var(--shadow); padding: 12px; gap: 8px; flex-direction: column;
+}
+.account-menu.open { display: flex; }
+.account-menu .am-head { display: grid; gap: 2px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.account-menu .am-head span { font-size: 13px; color: var(--muted); }
+.account-menu .am-note { margin: 0; font-size: 13px; color: var(--muted); }
+.account-menu .am-field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.account-menu input { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; }
+.account-menu .btn { width: 100%; }
+.account-menu .btn.danger { color: var(--red); border-color: #f0c9c8; }
+
+.modal.narrow { max-width: 420px; }
+.auth-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.auth-tabs button {
+  flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--muted);
+}
+.auth-tabs button.active { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 600; }
+.auth-form { display: grid; gap: 10px; }
+.auth-form label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.auth-form input { font: inherit; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; }
+.auth-form .btn.primary { margin-top: 4px; }
+.auth-err { background: #fdecec; color: var(--red); border: 1px solid #f3c9c9; border-radius: 8px; padding: 8px 10px; font-size: 13.5px; }

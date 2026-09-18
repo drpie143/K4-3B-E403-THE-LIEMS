@@ -66,11 +66,13 @@ def seed_session(o: Orchestrator, uid: str, sid: str, case: dict) -> None:
     sess = o.store.session(sid, uid)
     sess["last_question"] = case["input"]
     if case["after_answer"]:
-        level, style = case["after_answer"].split("/")
+        # "L4/chi_tiet" hoặc "L4/chi_tiet/co_che" — phần thứ ba là khía cạnh của lượt TRƯỚC
+        level, style, *rest = case["after_answer"].split("/")
+        prev_ask = rest[0] if rest else o.detector.detect(case["input"], "", {}, case["concept"] or None).ask_type
         concept = case["concept"] or "self_attention"
         d = Decision(kind="explain", concept=concept, level=level, style=style, full=False)
         sess.setdefault("answered", {})[concept] = time.time()
-        sess.setdefault("last", {})[concept] = {"decision": d.model_dump(), "level": level, "style": style,
+        sess.setdefault("last", {})[concept] = {"decision": d.model_dump(), "level": level, "style": style, "ask_type": prev_ask,
                                                 "analogy_id": None, "summary": f"{level}_{style}"}
         sess["last_concept"] = concept
     o.store.save_session(sid, uid, sess)

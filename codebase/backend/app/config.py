@@ -65,6 +65,11 @@ class Settings:
     embedding_model: str = ""       # "text-embedding-3-small" hoặc "text-embedding-004"
     supabase_url: str = ""
     supabase_key: str = ""
+    memory_flush_every: int = 3        # bao nhiêu lượt hỏi thì đẩy bộ nhớ lên Supabase
+    memory_compact_every: int = 10     # bao nhiêu lượt thì nén bộ nhớ dài hạn
+    memory_max_strategies: int = 6     # số cách giải thích tối đa nhớ cho mỗi khái niệm
+    memory_max_events: int = 50        # số sự kiện tối đa giữ lại cho mỗi người học
+    session_max_tried: int = 8         # số kiểu trình bày đã thử giữ trong trạng thái phiên
     cards_dir: Path = field(default_factory=lambda: BACKEND_DIR / "cards")
     personas_path: Path = field(default_factory=lambda: BACKEND_DIR / "personas.yaml")
     prompts_dir: Path = field(default_factory=lambda: BACKEND_DIR / "app" / "prompts")
@@ -109,6 +114,10 @@ def load_settings(env_file: Path | None = None) -> Settings:
         embedding_model=env.get("EMBEDDING_MODEL", "").strip(),
         supabase_url=env.get("SUPABASE_URL", "").strip(),
         supabase_key=env.get("SUPABASE_KEY", "").strip(),
+        memory_flush_every=int(env.get("MEMORY_FLUSH_EVERY", "3")),
+        memory_compact_every=int(env.get("MEMORY_COMPACT_EVERY", "10")),
+        memory_max_strategies=int(env.get("MEMORY_MAX_STRATEGIES", "6")),
+        memory_max_events=int(env.get("MEMORY_MAX_EVENTS", "50")),
     )
     for key, attr in [("CHUNKS_PATH", "chunks_path"), ("DB_PATH", "db_path"), ("TRACE_DIR", "trace_dir"), ("CACHE_DIR", "cache_dir"), ("TRANSCRIPTS_DIR", "transcripts_dir")]:
         if env.get(key):

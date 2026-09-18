@@ -1,0 +1,52 @@
+id: temperature
+term: Temperature
+vi_name: độ sáng tạo khi sinh token
+lesson_id: day01-foundation-a
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [temperature, top-k, top k, top-p, top p, sampling, độ sáng tạo, tham số sinh]
+prerequisites: [token]
+required_terms: [temperature, xác suất, token]
+
+core_claims:
+  - id: C1
+    text: "Mỗi bước sinh, mô hình có một danh sách <b>token</b> kèm <b>xác suất</b>; các tham số sinh quyết định chọn token nào trong danh sách đó."
+    src: [T04-070]
+  - id: C2
+    text: "Top-k và top-p khoanh vùng tập token được phép chọn: tăng lên là mở rộng không gian lựa chọn, giảm xuống là thu hẹp."
+    src: [T04-071]
+  - id: C3
+    text: "<b>Temperature</b> bằng 0 thì luôn lấy token xác suất cao nhất nên kết quả ổn định; tăng temperature thì kết quả ngẫu nhiên và sáng tạo hơn."
+    src: [T04-072]
+
+approved_analogies: []
+analogy_limits: []
+
+misconceptions:
+  - id: M1
+    pattern: "temperature cao thi thong minh hon"
+    text: "Temperature cao thì mô hình thông minh hơn"
+    fix: "Temperature chỉ đổi mức ngẫu nhiên khi chọn token, không làm mô hình biết thêm kiến thức."
+    src: [T04-072]
+  - id: M2
+    pattern: "top k va temperature la mot"
+    text: "Top-k và temperature là một"
+    fix: "Top-k/top-p khoanh vùng danh sách được chọn; temperature quyết định mức ngẫu nhiên trong vùng đã khoanh."
+    src: [T04-071]
+
+outside_lesson_notes:
+  - "Các tham số khác như presence/frequency penalty không nằm trong buổi này."
+
+primer:
+  html: "<b>Temperature</b> và top-k/top-p là các tham số khi gọi API, điều chỉnh mức ngẫu nhiên của token được sinh ra."
+  src: [T04-070]
+
+checks:
+  - id: TP-Q1
+    question: "Cần câu trả lời ổn định, lặp lại được thì nên đặt temperature thế nào?"
+    options:
+      - { k: A, text: "Đặt về gần 0", correct: true }
+      - { k: B, text: "Đặt lên 1 cho thông minh hơn", misconception: M1 }
+      - { k: C, text: "Không ảnh hưởng gì" }
+    src: [T04-072]

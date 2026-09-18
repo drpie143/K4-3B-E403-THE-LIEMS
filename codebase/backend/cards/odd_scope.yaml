@@ -1,0 +1,57 @@
+id: odd_scope
+term: Phạm vi vận hành (ODD)
+vi_name: Operational Design Domain
+lesson_id: day02-constraints
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [odd, operational design domain, phạm vi vận hành, scope hệ thống, điều kiện vận hành, ràng buộc]
+prerequisites: []
+required_terms: [phạm vi, điều kiện, cảnh báo]
+
+core_claims:
+  - id: C1
+    text: "<b>ODD</b> là <b>phạm vi</b> <b>điều kiện</b> mà hệ thống cam kết chạy đúng — ngoài phạm vi đó thì không hứa kết quả."
+    src: [T03-105]
+  - id: C2
+    text: "Sự cố ngoài phạm vi (hỏng cảm biến, mất nguồn) cần phương án dự phòng; hết dự phòng thì coi là tai nạn chứ không phải lỗi thiết kế."
+    src: [T03-106]
+  - id: C3
+    text: "Viết rõ phạm vi và <b>cảnh báo</b> trước cho người dùng giúp trả lời được khi hệ thống bị dùng ngoài điều kiện đã công bố."
+    src: [T03-107, T03-109]
+
+approved_analogies:
+  - id: bai_toan_an
+    text: "Giống đề toán “bạn An mua hai quả táo”: đề đã khoanh vùng nên không ai được thêm giả thiết lạ vào rồi bảo lời giải sai."
+    src: [T03-107]
+
+analogy_limits:
+  - "Ví dụ đề toán chỉ nói về việc khoanh vùng giả thiết, không nói về cách xử lý sự cố."
+
+misconceptions:
+  - id: M1
+    pattern: "he thong phai dung trong moi truong hop"
+    text: "Hệ thống phải chạy đúng trong mọi trường hợp"
+    fix: "Không hệ thống nào đúng trong mọi điều kiện; việc của kỹ sư là công bố phạm vi và chuẩn bị phương án dự phòng."
+    src: [T03-106]
+  - id: M2
+    pattern: "scope cang rong cang tot"
+    text: "Scope càng rộng càng tốt"
+    fix: "Bài giảng khuyên thu hẹp scope: càng hẹp thì càng dễ đảm bảo độ chính xác và đỡ lan man."
+    src: [T03-109]
+
+outside_lesson_notes:
+  - "Tiêu chuẩn ISO/SAE cho ODD của xe tự hành không nằm trong buổi này."
+
+primer:
+  html: "<b>Phạm vi vận hành</b> là câu trả lời cho: hệ thống của tôi chạy đúng trong điều kiện nào, và ngoài điều kiện đó thì báo gì cho người dùng."
+  src: [T03-105]
+
+checks:
+  - id: ODD-Q1
+    question: "Khi hệ thống bị dùng ngoài điều kiện đã công bố, việc nên làm là gì?"
+    options:
+      - { k: A, text: "Báo rõ cho người dùng là đang ngoài phạm vi và nêu giới hạn", correct: true }
+      - { k: B, text: "Cứ trả lời như bình thường", misconception: M1 }
+      - { k: C, text: "Tắt hệ thống vĩnh viễn" }
+    src: [T03-107]

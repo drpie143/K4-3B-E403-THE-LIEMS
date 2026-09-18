@@ -1,0 +1,52 @@
+id: north_star
+term: North Star Metric
+vi_name: chỉ số kim chỉ nam
+lesson_id: day02-metrics-automation
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [north star, kim chỉ nam, chỉ số thành công, metric, đo lường sản phẩm]
+prerequisites: []
+required_terms: [chỉ số, giá trị, trung gian]
+
+core_claims:
+  - id: C1
+    text: "<b>North Star Metric</b> là <b>chỉ số</b> cuối cùng phản ánh đúng <b>giá trị</b> sản phẩm mang lại — ví dụ với sản phẩm học tập thì là hiệu quả học tập, không phải số người đăng ký."
+    src: [T02-024]
+  - id: C2
+    text: "Các chỉ số như lượt truy cập hay tỉ lệ quay lại chỉ là chỉ số <b>trung gian</b>: chúng dẫn dần tới kim chỉ nam chứ không thay thế được nó."
+    src: [T02-019, T02-024]
+  - id: C3
+    text: "Mỗi bậc thang từ chỉ số trung gian lên kim chỉ nam là một giả thuyết, nên phải đo từng giai đoạn để biết giả thuyết đó đúng hay sai."
+    src: [T02-024]
+
+approved_analogies: []
+analogy_limits: []
+
+misconceptions:
+  - id: M1
+    pattern: "nhieu nguoi dung la san pham tot"
+    text: "Cứ nhiều người dùng nghĩa là sản phẩm tốt"
+    fix: "Người dùng có thể quay lại vì được tặng điểm hoặc vì tiền marketing; đó là chỉ số trung gian, chưa chứng minh giá trị."
+    src: [T02-019]
+  - id: M2
+    pattern: "mot chi so la du"
+    text: "Chỉ cần một chỉ số duy nhất, không cần chỉ số trung gian"
+    fix: "Kim chỉ nam thường mất rất lâu mới đo được, nên vẫn cần các bậc thang chỉ số trung gian để theo dõi."
+    src: [T02-024]
+
+outside_lesson_notes:
+  - "Công thức tính cụ thể cho từng ngành (AARRR, HEART) không nằm trong buổi này."
+
+primer:
+  html: "<b>North Star Metric</b> là chỉ số duy nhất mà cả nhóm hướng tới, đại diện cho giá trị thật mà sản phẩm tạo ra cho người dùng."
+  src: [T02-024]
+
+checks:
+  - id: NS-Q1
+    question: "Với một sản phẩm học tập, đâu gần với North Star Metric nhất?"
+    options:
+      - { k: A, text: "Kết quả học tập của người học tăng lên", correct: true }
+      - { k: B, text: "Số lượt truy cập trong tháng", misconception: M1 }
+      - { k: C, text: "Số lần bấm nút trong ứng dụng" }
+    src: [T02-024]

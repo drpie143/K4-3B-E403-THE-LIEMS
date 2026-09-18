@@ -2,13 +2,13 @@
  * UI của mock P3 — Trợ giảng AI trong trang học VLearn.
  * Toàn bộ "AI" ở đây là giả lập bằng engine.js; không gọi mạng.
  */
-(function () {
+(function (root) {
   "use strict";
 
-  const C = window.P3_CONTENT;
+  const C = root.P3_CONTENT;
   const E = window.P3_ENGINE;
   const LOCAL_SRC = window.VLEARN_SOURCES_LOCAL || null;
-  const DEMO_USER = { name: "Đoàn", initial: "Đ" };
+  const DEMO_USER = { name: "bạn", initial: "?" };   // thay bằng tên tài khoản sau khi đăng nhập
   const STORE_KEY = "p3-mock-v1";
   const $ = (s, el) => (el || document).querySelector(s);
   const API = window.P3_API;
@@ -113,41 +113,13 @@
   function scrollDown() { chat.scrollTop = chat.scrollHeight; }
 
   /* ---------------- Sidebar ---------------- */
+  // Danh sách buổi học và các mục do js/lessons.js dựng từ /api/lessons.
+  // Hàm này chỉ còn là bản dự phòng khi mở offline (không có backend).
   function renderSidebar() {
-    const items = [
-      [`Giới thiệu giảng viên và khảo sát làm quen lớp`, "active"],
-      [`Nội dung buổi học`, ""],
-      [`AI, machine learning, deep learning và foundation model`, ""],
-      [`Ba nhóm AI và lịch sử phát triển`, ""],
-      [`Vì sao 2025-2026 là bước ngoặt`, ""],
-      [`Hỏi đáp về phạm vi và lộ trình khóa học`, ""],
-      [`LLM: encoder–decoder, transformer và attention`, ""],
-      [`Trò chuyện bên lề trong lúc phát thẻ: hành trình công nghệ và Google Developer Expert`, ""],
-      [`Trao đổi về hệ thống LMS học viên đang xây`, ""],
-      [`Google trong giáo dục K12 (kết phần chia sẻ)`, ""],
-      [`Transformer — trái tim của LLM`, ""],
-      [`Self-attention: ví dụ "con mèo ngồi trên bàn" và công thức Q–K–V`, ""],
-      [`Token và cơ chế dự đoán next token`, ""],
-      [`Vì sao có hallucination — bias dữ liệu và quá trình huấn luyện`, ""],
-      [`LLM được tạo ra như thế nào — ba giai đoạn huấn luyện`, ""],
-      [`Giới hạn của LLM: knowledge cutoff, hallucination, context window`, ""],
-      [`Khảo sát API và Q&A: hệ thống production có gọi API`, ""],
-      [`Token economy và chi phí API`, ""],
-      [`Chọn mô hình và context window trong thiết kế hệ thống`, ""],
-      [`Tổng kết buổi học`, ""],
-      [`Lab demo: trực quan hóa self-attention ([TA] hướng dẫn)`, ""],
-    ];
+    if (root.P3_LESSONS) return;
     const box = $("#sideItems");
-    items.forEach(([label, st], i) => {
-      box.appendChild(
-        h("button", { class: "side-item" + (st === "active" ? " active" : "") }, [
-          h("span", { class: "num", text: String(i + 1) }),
-          h("span", { class: "label", text: label }),
-          st === "done" ? h("span", { class: "state done" }, [icon("i-check", 14), " Đã xong"]) : null,
-          st === "active" ? h("span", { class: "state", text: "Đang học" }) : null,
-        ])
-      );
-    });
+    if (!box || box.children.length) return;
+    box.appendChild(h("div", { class: "side-empty", text: "Mở trang qua backend (?mode=live) để thấy 6 buổi học." }));
   }
 
   /* ---------------- Khung chat ---------------- */
@@ -155,15 +127,14 @@
     const hr = new Date().getHours();
     const part = hr < 11 ? "sáng" : hr < 18 ? "chiều" : "tối";
     chat.innerHTML = "";
-    const starters = [
-      "Self-attention là gì?",
-      "Q, K, V khác nhau thế nào?",
-      "Multi-head attention là gì?",
-    ];
+    const ctx = root.P3_LESSON_CTX || null;
+    const starters = (ctx && ctx.starters && ctx.starters.length)
+      ? ctx.starters
+      : ["Self-attention là gì?", "Q, K, V khác nhau thế nào?", "Multi-head attention là gì?"];
     chat.appendChild(
       h("div", { class: "empty" }, [
         h("div", { class: "hi", text: "Chào buổi " + part + ", " + DEMO_USER.name.toUpperCase() + "!" }),
-        h("div", { class: "ctx", text: "Đang mở: " + C.LESSON.section }),
+        h("div", { class: "ctx", text: "Đang mở: " + ((root.P3_LESSON_CTX && root.P3_LESSON_CTX.title) || C.LESSON.section) }),
         h("div", { class: "starters" }, starters.map((q) => h("button", { class: "chip", text: q, onclick: () => ask(q) }))),
       ])
     );
@@ -219,7 +190,10 @@
   }
 
   /* ---------------- Chế độ live (backend) ---------------- */
-  function liveUser() { return API.userFor(S.personaId); }
+  function liveUser() {
+    const acc = root.P3_ACCOUNT;
+    return (acc && acc.user_id) || API.userFor(S.personaId);
+  }
 
   function liveFail(err) {
     console.warn(err);
@@ -992,7 +966,11 @@
     if (LIVE) {
       box.appendChild(h("div", { style: "margin:0 0 10px;padding:6px 8px;border-radius:8px;background:#203656;color:#cfe0ff", text: "Đang dùng backend · provider: " + (LIVE_INFO.provider || "…") }));
     }
-    box.appendChild(h("h4", { text: "Hồ sơ giả lập" }));
+    if (root.P3_ACCOUNT) {
+      box.appendChild(h("div", { style: "margin:0 0 10px;padding:6px 8px;border-radius:8px;background:#e9f6ee;color:#1d7f47" },
+        ["Đang dùng tài khoản: " + (root.P3_ACCOUNT.display_name || root.P3_ACCOUNT.email) + " — hồ sơ và bộ nhớ dài hạn lưu theo tài khoản này."]));
+    }
+    box.appendChild(h("h4", { text: root.P3_ACCOUNT ? "Hồ sơ giả lập (chỉ dùng khi chưa đăng nhập)" : "Hồ sơ giả lập" }));
     const grid = h("div", { class: "personas" });
     Object.entries(C.PERSONAS).forEach(([id, p]) => {
       grid.appendChild(h("button", { "aria-pressed": String(S.personaId === id), onclick: () => switchPersona(id) }, [p.label, h("small", { text: p.note })]));
@@ -1107,6 +1085,28 @@
     e.currentTarget.setAttribute("aria-expanded", String(open));
   });
 
+  /* ---------------- Cầu nối cho lessons.js / auth.js ---------------- */
+  root.P3_APP = {
+    newChat,
+    greeting,
+    renderNotebook,
+    renderDemo,
+    showTutor,
+    ask,
+    user: liveUser,
+    setUser(info) {           // gọi khi đăng nhập / đăng xuất
+      DEMO_USER.name = (info && info.name) || "bạn";
+      DEMO_USER.initial = (info && info.initial) || "?";
+      const av = $("#topAvatar");
+      if (av) av.textContent = DEMO_USER.initial;
+      greeting();
+      renderNotebook();
+    },
+    onLesson() {              // gọi khi đổi buổi học
+      newChat();
+    },
+  };
+
   /* ---------------- Khởi động ---------------- */
   load();
   document.body.classList.toggle("dev", S.devMode);
@@ -1120,4 +1120,4 @@
     API.health().then((hh) => { LIVE_INFO.provider = hh.provider + (hh.model && hh.model !== "fake" ? " · " + hh.model : ""); renderDemo(); }).catch(liveFail);
     API.personas().then((ps) => { LIVE_INFO.personas = ps; renderDemo(); }).catch(() => {});
   }
-})();
+})(window);

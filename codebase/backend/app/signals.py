@@ -51,19 +51,26 @@ class SignalDetector:
         order = [c for c in CONCEPT_ORDER if c in cards.cards] + [c for c in cards.cards if c not in CONCEPT_ORDER]
         self.patterns = [(cid, _alias_regex(cards.cards[cid].aliases + [cards.cards[cid].term])) for cid in order]
 
-    def find_concept(self, text: str) -> str | None:
+    def find_concept(self, text: str, lesson_concepts: list[str] | None = None) -> str | None:
+        """Tìm khái niệm được nhắc tới. Khái niệm của buổi đang mở được ưu tiên
+        (tránh bắt nhầm sang thẻ của buổi khác khi hai thẻ có từ khoá gần nhau)."""
         n = norm(text)
-        for cid, rx in self.patterns:
-            if rx.search(n):
-                return cid
-        return None
+        hits = [cid for cid, rx in self.patterns if rx.search(n)]
+        if not hits:
+            return None
+        if lesson_concepts:
+            in_lesson = [c for c in hits if c in lesson_concepts]
+            if in_lesson:
+                return in_lesson[0]
+        return hits[0]
 
-    def detect(self, text: str, selection: str, session: dict, page_concept: str | None, now: float | None = None) -> Signals:
+    def detect(self, text: str, selection: str, session: dict, page_concept: str | None, now: float | None = None,
+               lesson_concepts: list[str] | None = None) -> Signals:
         now = now or time.time()
         nq = norm(text)
         confused = bool(CONFUSED.search(nq))
-        in_question = self.find_concept(text)
-        concept = in_question or (self.find_concept(selection) if selection else None)
+        in_question = self.find_concept(text, lesson_concepts)
+        concept = in_question or (self.find_concept(selection, lesson_concepts) if selection else None)
         from_page = False
         if not concept and (confused or selection):
             concept = session.get("last_concept") or page_concept
@@ -71,7 +78,9 @@ class SignalDetector:
         ask_type = next((name for name, rx in ASK_TYPES if rx.search(nq)), "khac")
         last = session.get("answered", {}).get(concept or "", 0)
         # Hỏi lại = hỏi cùng một khía cạnh trong thời gian ngắn. Hỏi khía cạnh khác là câu hỏi mới.
-        same_aspect = session.get("last", {}).get(concept or "", {}).get("ask_type") in (None, ask_type)
+        # Phiên cũ (trước khi có ask_type) không ghi khía cạnh → chỉ coi là hỏi lại nếu câu mới cũng chung chung.
+        prev_ask = session.get("last", {}).get(concept or "", {}).get("ask_type")
+        same_aspect = prev_ask == ask_type if prev_ask else ask_type in ("khai_niem", "khac")
         reask = bool(last and not confused and same_aspect and now - last < self.reask_seconds)
         return Signals(
             text=text, concept=concept, concept_from_page=from_page, confused=confused,

@@ -121,7 +121,8 @@ class Retriever:
         if not docs:
             self.mode = "summary"
             for sid, meta in cards.sources.items():
-                file = "transcript-04-clean.md" if sid.startswith("T04") else "transcript-06-clean.md"
+                # T03-105 → transcript-03-clean.md (đúng cho cả 6 buổi, không chỉ 04/06)
+                file = f"transcript-{sid[1:3]}-clean.md"
                 docs.append(
                     Passage(
                         id=sid,

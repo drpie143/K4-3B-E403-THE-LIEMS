@@ -1,0 +1,57 @@
+id: tool_calling
+term: Tool calling
+vi_name: gọi công cụ thay vì để LLM tự tính
+lesson_id: day02-constraints
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [tool calling, gọi tool, gọi hàm, function calling, tách deterministic, đếm ký tự]
+prerequisites: []
+required_terms: [công cụ, ý định, chắc chắn]
+
+core_claims:
+  - id: C1
+    text: "Việc cần độ <b>chắc chắn</b> (đếm, cộng trừ, tra bảng) nên tách ra thành một <b>công cụ</b> viết bằng code, thay vì bắt LLM tự tính."
+    src: [T03-034, T03-079]
+  - id: C2
+    text: "LLM chỉ cần nhận đúng <b>ý định</b> của người dùng và bóc đúng tham số, rồi gọi công cụ — kết quả lúc đó chính xác chứ không phụ thuộc xác suất."
+    src: [T03-034, T03-035]
+  - id: C3
+    text: "Phần không chắc chắn còn lại nằm ở bước chọn công cụ và bóc tham số, nên hệ thống phải có bài test cho chính bước đó."
+    src: [T03-079]
+
+approved_analogies:
+  - id: dem_ky_tu
+    text: "Hỏi “trong chữ strawberry có mấy chữ R”: bắt mô hình tự đếm thì dễ sai, còn gọi một hàm đếm ký tự thì luôn đúng."
+    src: [T03-034]
+
+analogy_limits:
+  - "Ví dụ đếm ký tự chỉ minh hoạ nhóm việc tính toán; không phải mọi việc đều viết được thành hàm."
+
+misconceptions:
+  - id: M1
+    pattern: "llm tu tinh la du"
+    text: "Cứ để LLM tự tính là đủ, không cần công cụ"
+    fix: "Mô hình là xác suất: đúng ở câu này chưa chắc đúng ở câu khác, nên việc cần chắc chắn phải giao cho code."
+    src: [T03-035]
+  - id: M2
+    pattern: "goi tool la luon dung"
+    text: "Cứ gọi tool là luôn đúng 100%"
+    fix: "Vẫn còn rủi ro ở bước nhận diện ý định và bóc tham số; phải test bước đó."
+    src: [T03-079]
+
+outside_lesson_notes:
+  - "Chuẩn giao thức MCP hay cách đăng ký tool theo từng SDK không nằm trong buổi này."
+
+primer:
+  html: "<b>Tool calling</b> là cho mô hình gọi một hàm có sẵn để làm phần việc cần chính xác tuyệt đối."
+  src: [T03-034]
+
+checks:
+  - id: TC-Q1
+    question: "Vì sao nên cho LLM gọi một hàm đếm ký tự thay vì tự đếm?"
+    options:
+      - { k: A, text: "Vì hàm cho kết quả chắc chắn, còn mô hình chạy theo xác suất", correct: true }
+      - { k: B, text: "Vì gọi hàm rẻ hơn về token" }
+      - { k: C, text: "Vì mô hình không đọc được chữ", misconception: M1 }
+    src: [T03-034]

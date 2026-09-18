@@ -104,3 +104,94 @@ CREATE OR REPLACE FUNCTION match_chunks (
   ORDER BY embedding <=> query_embedding
   LIMIT match_count;
 $$;
+
+-- ==============================================================================
+-- 10. TÀI KHOẢN HỌC VIÊN (đăng ký / đăng nhập)
+-- `accounts.id` chính là `user_id` dùng trong profiles / strategy_memory / events,
+-- nên mỗi người đăng nhập sẽ thấy đúng hồ sơ và bộ nhớ dài hạn của mình.
+-- Mật khẩu lưu dạng băm PBKDF2-SHA256 ("pbkdf2$<vòng>$<salt>$<hash>"), không bao giờ lưu thô.
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS accounts (
+  id            TEXT PRIMARY KEY,
+  email         TEXT UNIQUE NOT NULL,
+  display_name  TEXT,
+  password_hash TEXT NOT NULL,
+  role          TEXT DEFAULT 'learner',      -- learner | ta | admin
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  last_login_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS account_sessions (
+  token_hash TEXT PRIMARY KEY,               -- SHA-256 của token, không lưu token gốc
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS account_sessions_account_idx ON account_sessions (account_id);
+CREATE INDEX IF NOT EXISTS accounts_email_idx ON accounts (LOWER(email));
+
+-- Bật RLS: chỉ backend (service_role key) được đọc/ghi hai bảng này.
+ALTER TABLE accounts         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE account_sessions ENABLE ROW LEVEL SECURITY;
+
+-- ==============================================================================
+-- 11. GIỮ BỘ NHỚ DÀI HẠN KHÔNG PHÌNH
+-- Backend đã nén ở phía ứng dụng (app/memory.py). Hàm dưới đây là lớp chặn thứ hai,
+-- chạy được bằng tay trong SQL Editor hoặc bằng pg_cron.
+-- ==============================================================================
+CREATE INDEX IF NOT EXISTS profiles_user_idx         ON profiles (user_id);
+CREATE INDEX IF NOT EXISTS strategy_memory_user_idx  ON strategy_memory (user_id, concept);
+CREATE INDEX IF NOT EXISTS events_user_created_idx   ON events (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS sessions_user_idx         ON sessions (user_id, updated_at DESC);
+
+CREATE OR REPLACE FUNCTION prune_learner_memory(
+  p_user_id        TEXT,
+  p_max_strategies INT DEFAULT 6,    -- số cách giải thích giữ lại cho mỗi khái niệm
+  p_max_events     INT DEFAULT 50,   -- số sự kiện giữ lại cho mỗi người học
+  p_strategy_ttl   INT DEFAULT 30,   -- ngày: cách giải thích cũ hơn thì quên
+  p_session_ttl    INT DEFAULT 7     -- ngày: phiên học cũ hơn thì xoá
+) RETURNS TABLE (deleted_strategies INT, deleted_events INT, deleted_sessions INT)
+LANGUAGE plpgsql AS $$
+DECLARE s INT; e INT; ss INT;
+BEGIN
+  -- 1. Quên các cách giải thích quá hạn
+  DELETE FROM strategy_memory
+   WHERE user_id = p_user_id AND last_at < NOW() - (p_strategy_ttl || ' days')::interval;
+  GET DIAGNOSTICS s = ROW_COUNT;
+
+  -- 2. Mỗi khái niệm chỉ giữ N cách tốt nhất (worked - failed, rồi tới gần đây nhất)
+  WITH ranked AS (
+    SELECT ctid, ROW_NUMBER() OVER (
+             PARTITION BY concept ORDER BY (worked - failed) DESC, last_at DESC) AS rn
+      FROM strategy_memory WHERE user_id = p_user_id)
+  DELETE FROM strategy_memory sm USING ranked r
+   WHERE sm.ctid = r.ctid AND r.rn > p_max_strategies;
+  GET DIAGNOSTICS e = ROW_COUNT;
+  s := s + e;
+
+  -- 3. Nhật ký sự kiện: giữ N dòng gần nhất
+  WITH ranked AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at DESC) AS rn
+      FROM events WHERE user_id = p_user_id)
+  DELETE FROM events ev USING ranked r
+   WHERE ev.id = r.id AND r.rn > p_max_events;
+  GET DIAGNOSTICS e = ROW_COUNT;
+
+  -- 4. Phiên học cũ
+  DELETE FROM sessions
+   WHERE user_id = p_user_id AND updated_at < NOW() - (p_session_ttl || ' days')::interval;
+  GET DIAGNOSTICS ss = ROW_COUNT;
+
+  RETURN QUERY SELECT s, e, ss;
+END; $$;
+
+-- Xem nhanh bộ nhớ của từng người học đang chiếm bao nhiêu dòng
+CREATE OR REPLACE VIEW learner_memory_size AS
+SELECT a.id AS user_id, a.email, a.display_name,
+       (SELECT COUNT(*) FROM profiles         p WHERE p.user_id = a.id) AS profiles,
+       (SELECT COUNT(*) FROM strategy_memory  m WHERE m.user_id = a.id) AS strategies,
+       (SELECT COUNT(*) FROM events           e WHERE e.user_id = a.id) AS events,
+       (SELECT COUNT(*) FROM sessions         s WHERE s.user_id = a.id) AS sessions,
+       a.last_login_at
+  FROM accounts a;

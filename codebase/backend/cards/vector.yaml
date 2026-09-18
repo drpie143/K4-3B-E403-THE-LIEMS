@@ -4,7 +4,7 @@ vi_name: toạ độ số của token
 lesson_id: day01-self-attention
 reviewed: true
 reviewed_by: "[tên TA/nhóm]"
-aliases: [vector, vecto, vectơ, embedding, nhúng]
+aliases: [vector, vecto, vectơ, embedding, nhúng vector, vector hoá]
 prerequisites: [token]
 required_terms: [vector]
 core_claims:
