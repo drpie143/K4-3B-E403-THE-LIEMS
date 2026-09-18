@@ -59,6 +59,13 @@ services:
       - key: SPECULATIVE_EXPLAIN
         value: "1"
 
+      # Máy Render free ngủ sau ~15 phút và xoá sạch /tmp khi tỉnh lại. Bình thường bộ nhớ
+      # dài hạn gom 3 lượt mới đẩy lên Supabase một lần — gặp lúc máy ngủ giữa chừng là mất.
+      # Đặt 1 để mỗi lượt đẩy ngay: tốn thêm một lời gọi Supabase, đổi lại không mất hồ sơ.
+      # (Tài khoản đăng ký/đăng nhập thì ghi thẳng lên Supabase ngay, không phụ thuộc biến này.)
+      - key: MEMORY_FLUSH_EVERY
+        value: "1"
+
       # Ổ đĩa gói free không giữ lại sau mỗi lần deploy — đặt DB và vết chạy vào /tmp
       # để tránh lỗi ghi file. Hồ sơ và bộ nhớ dài hạn vẫn nằm trên Supabase.
       - key: DB_PATH

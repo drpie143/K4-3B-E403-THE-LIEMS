@@ -414,7 +414,30 @@ Không thấy dòng này nghĩa là `SUPABASE_URL`/`SUPABASE_KEY` sai hoặc b�
   `window.VLEARN_API_BASE = "https://<tên-app>.onrender.com";`
 - đặt `ALLOWED_ORIGINS=https://<tên-app>.vercel.app` bên Render.
 
-### 10.4 Kiểm tra sau khi deploy
+### 10.4 Tài khoản và hồ sơ sống ở đâu
+
+SQLite (`p3.db`) là bản chính **trên máy đang chạy**; Supabase là bản lưu dùng chung.
+Quan trọng vì trên Render gói free, `/tmp/p3.db` **bị xoá mỗi lần máy ngủ dậy**.
+
+| Dữ liệu | Ghi lên Supabase khi nào | Mất không nếu máy restart? |
+|---|---|---|
+| Tài khoản (email, mật khẩu băm) | **Ngay lúc đăng ký** | Không |
+| Phiên đăng nhập (token) | **Ngay lúc đăng nhập** | Không — vẫn ở nguyên trạng thái đăng nhập |
+| Mức hiểu, bộ nhớ "cách nào hiệu quả" | Gom `MEMORY_FLUSH_EVERY` lượt rồi đẩy một lần, **và** mỗi khi mở Sổ tay / đăng xuất | Có thể mất vài lượt cuối → `render.yaml` đặt `MEMORY_FLUSH_EVERY=1` |
+
+Khi máy tìm không thấy trong SQLite, nó **tự đọc bù từ Supabase rồi nạp lại vào SQLite**
+(`app/auth.py` · `_by_email`, `_by_id`, `account_for_token`). Nhờ vậy đăng nhập vẫn chạy
+sau khi máy mất sạch ổ đĩa. Đã kiểm bằng cách tạo tài khoản ở một SQLite rồi đăng nhập
+từ một SQLite trống hoàn toàn — vào được, đúng `user_id`, và hồ sơ mức hiểu về đủ.
+
+Mật khẩu băm **PBKDF2-HMAC-SHA256** có salt riêng từng người, so sánh hằng thời gian.
+Token phiên chỉ lưu dạng **SHA-256**, không lưu bản thô. Không bao giờ có mật khẩu thô
+trong SQLite hay Supabase.
+
+> Chưa cấu hình Supabase thì mọi thứ vẫn chạy, chỉ là nằm hết trong `p3.db` trên máy —
+> chạy ở nhà thì không sao, deploy lên Render thì **mất tài khoản mỗi lần máy ngủ dậy**.
+
+### 10.5 Kiểm tra sau khi deploy
 
 | Bước | Phải thấy |
 |---|---|
