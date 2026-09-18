@@ -66,6 +66,10 @@ class Orchestrator:
         )
         self.detector = SignalDetector(self.cards, settings.reask_seconds)
         self.store = ProfileStore(settings, self.cards, db_path)
+        from .lessons import LessonStore
+        self.lessons = LessonStore(self.cards, settings, self.retriever, self.store.sb)
+        from .auth import AuthStore
+        self.auth = AuthStore(self.store.db, self.store.sb)
         self.prompts = Prompts(settings.prompts_dir)
         self.llm = llm or make_client(settings)
         self.cache = AnswerCache(settings.cache_dir)
@@ -80,6 +84,9 @@ class Orchestrator:
 
     def lesson_title(self, lesson_id: str) -> str:
         return self.cards.lessons.get(lesson_id, {}).get("title", lesson_id)
+
+    def lesson_concepts(self, lesson_id: str) -> list[str]:
+        return [c for c in self.cards.lessons.get(lesson_id, {}).get("concepts", []) if self.cards.get(c)]
 
     def page_concept(self, lesson_id: str) -> str | None:
         concepts = self.cards.lessons.get(lesson_id, {}).get("concepts", [])
@@ -142,8 +149,17 @@ class Orchestrator:
     def _grounding(self, card: Card, text: str, selection: str, lesson_id: str) -> tuple[list[Passage], list[str], set[str]]:
         query = " ".join([text, selection, card.term, *card.required_terms])
         hits = self.retriever.search(query, lesson_id, self.s.retrieval_top_k, boost_ids=card.source_ids)
-        grounded = [h.id for h in hits if h.score >= self.s.retrieval_min_score and h.id in card.source_ids]
-        allowed = {h.id for h in hits} | set(self.cards.sources)
+        # Một chunk có thể gộp nhiều đoạn (T04-055 chứa cả T04-056), nên phải soi cả source_ids
+        # bên trong chunk — nếu chỉ so id chunk thì thẻ có nguồn nằm giữa chunk sẽ bị coi là "không có nguồn".
+        grounded: list[str] = []
+        for h in hits:
+            if h.score < self.s.retrieval_min_score:
+                continue
+            inside = [s for s in ([h.id] + list(getattr(h, "source_ids", []) or [])) if s in card.source_ids]
+            grounded += inside
+        grounded = list(dict.fromkeys(grounded))
+        allowed = ({h.id for h in hits} | {s for h in hits for s in (getattr(h, "source_ids", []) or [])}
+                   | set(self.cards.sources))
         return hits, grounded, allowed
 
     def _ctx(self, req, card: Card, sess: dict, sig: Signals, survey: dict | None, now: datetime,
@@ -402,6 +418,8 @@ class Orchestrator:
         now = utcnow()
         self.store.ensure_user(req.user_id, now)
         sess = self.store.session(req.session_id, req.user_id)
+        # Đếm lượt hỏi: cứ N lượt thì nén bộ nhớ dài hạn rồi đẩy lên Supabase (§ memory.py).
+        turn.memory = self.store.note_turn(req.user_id)
         if req.action == "ask":
             sess["last_question"] = req.text
         text, selection = req.text, req.selection
@@ -690,6 +708,8 @@ class Orchestrator:
             "model_explain": self.s.model_explain, "model_judge": self.s.model_judge,
             "use_judge": self.s.use_judge, "replay": self.s.replay,
             "retrieval_mode": self.retriever.mode, "passages": len(self.retriever.docs),
+            "lessons": [{"id": l["id"], "title": l["title"], "source": l["source"]} for l in self.lessons.catalog()],
+            "memory": self.store.memory_health(),
             "cards": sorted(self.cards.cards), "prompt_version": self.prompts.version,
         }
 

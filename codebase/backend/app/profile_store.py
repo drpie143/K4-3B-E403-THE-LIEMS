@@ -62,13 +62,39 @@ class ProfileStore:
         self.lock = threading.RLock()
         pp = settings.personas_path
         self.personas: dict[str, dict] = yaml.safe_load(Path(pp).read_text(encoding="utf-8")) if Path(pp).exists() else {}
+        from .supabase_client import SupabaseClient
+        from .memory import MemorySync
+        self.sb = SupabaseClient(settings.supabase_url, settings.supabase_key) if getattr(settings, "supabase_url", None) else None
+        self.mem = MemorySync(self.sb, settings)
 
     # ------------------------------------------------------------ users
     def ensure_user(self, user_id: str, now: datetime | None = None) -> None:
         with self.lock:
             if self.db.execute("SELECT 1 FROM settings WHERE user_id=?", (user_id,)).fetchone():
                 return
+            if self._pull_remote(user_id):
+                return
             self._seed(user_id, now or utcnow())
+
+    def _pull_remote(self, user_id: str) -> bool:
+        """Kéo hồ sơ + bộ nhớ dài hạn của tài khoản này từ Supabase xuống SQLite (một lần)."""
+        data = self.mem.pull(user_id)
+        if not data or not (data.get("settings") or data.get("profiles")):
+            return False
+        for row in data.get("settings") or [{"user_id": user_id, "memory_on": 1, "preferred_style": None}]:
+            self.db.execute("INSERT OR REPLACE INTO settings VALUES (?,?,?)",
+                            (user_id, int(row.get("memory_on", 1)), row.get("preferred_style")))
+        for row in data.get("profiles") or []:
+            self.db.execute("INSERT OR REPLACE INTO profiles VALUES (?,?,?,?,?,?,?)",
+                            (user_id, row["concept"], row.get("level", "chua"), int(row.get("streak", 0)),
+                             row.get("source", "tu_khai"), row.get("updated_at") or iso(utcnow()),
+                             row.get("last_signal_at") or iso(utcnow())))
+        for row in data.get("strategy_memory") or []:
+            self.db.execute("INSERT OR REPLACE INTO strategy_memory VALUES (?,?,?,?,?,?)",
+                            (user_id, row["concept"], row["strategy"], int(row.get("worked", 0)),
+                             int(row.get("failed", 0)), row.get("last_at") or iso(utcnow())))
+        self.db.commit()
+        return True
 
     def _seed(self, user_id: str, now: datetime) -> None:
         p = self.personas.get(user_id, {})
@@ -106,6 +132,12 @@ class ProfileStore:
             if preferred_style is not None or clear_style:
                 self.db.execute("UPDATE settings SET preferred_style=? WHERE user_id=?", (None if clear_style else preferred_style, user_id))
             self.db.commit()
+            
+            r = self.db.execute("SELECT memory_on, preferred_style FROM settings WHERE user_id=?", (user_id,)).fetchone()
+            if r:
+                self.mem.put("settings", user_id, {
+                    "user_id": user_id, "memory_on": r["memory_on"], "preferred_style": r["preferred_style"],
+                })
 
     # ------------------------------------------------------------ reads
     def profile(self, user_id: str, now: datetime | None = None) -> dict[str, Any]:
@@ -182,7 +214,13 @@ class ProfileStore:
             "INSERT INTO events (user_id, concept, type, payload, before_json, created_at) VALUES (?,?,?,?,?,?)",
             (user_id, concept, etype, json.dumps(payload, ensure_ascii=False), before, iso(now)),
         )
-        return int(cur.lastrowid)
+        eid = int(cur.lastrowid)
+        self.mem.put("events", f"{user_id}:{eid}", {
+            "user_id": user_id, "concept": concept, "type": etype,
+            "payload": payload, "before_json": json.loads(before) if before else {},
+            "created_at": iso(now),
+        })
+        return eid
 
     def apply_event(self, user_id: str, concept: str, etype: str, level: str | None = None, now: datetime | None = None) -> Notice | None:
         """Quy tắc mức hiểu (port applyEvent của mock)."""
@@ -237,6 +275,10 @@ class ProfileStore:
             (user_id, concept, lvl, streak, source, iso(now), iso(now)),
         )
         self.db.commit()
+        self.mem.put("profiles", f"{user_id}:{concept}", {
+            "user_id": user_id, "concept": concept, "level": lvl, "streak": streak,
+            "source": source, "updated_at": iso(now), "last_signal_at": iso(now),
+        })
 
     def record_strategy(self, user_id: str, concept: str, strategies: list[str], outcome: str, now: datetime | None = None) -> None:
         """Ghi cách giải thích đã hiệu quả / chưa hiệu quả (§7.4.3)."""
@@ -258,6 +300,12 @@ class ProfileStore:
                     f"UPDATE strategy_memory SET {outcome} = {outcome} + 1, last_at=? WHERE user_id=? AND concept=? AND strategy=?",
                     (iso(now), user_id, concept, sname),
                 )
+                r = self.db.execute("SELECT worked, failed FROM strategy_memory WHERE user_id=? AND concept=? AND strategy=?", (user_id, concept, sname)).fetchone()
+                if r:
+                    self.mem.put("strategy_memory", f"{user_id}:{concept}:{sname}", {
+                        "user_id": user_id, "concept": concept, "strategy": sname,
+                        "worked": r["worked"], "failed": r["failed"], "last_at": iso(now),
+                    })
             self._log(user_id, concept, f"strategy_{outcome}", {"strategies": strategies}, before, now)
             self.db.commit()
 
@@ -285,7 +333,17 @@ class ProfileStore:
             self.db.commit()
         return True
 
+    def _delete_remote(self, user_id: str, concept: str | None, include_settings: bool) -> None:
+        f = {"user_id": f"eq.{user_id}"}
+        cf = {**f, "concept": f"eq.{concept}"} if concept else f
+        self.mem.drop("profiles", cf)
+        self.mem.drop("strategy_memory", cf)
+        self.mem.drop("events", cf)
+        if include_settings:
+            self.mem.drop("settings", f)
+
     def _delete_rows(self, user_id: str, concept: str | None, include_settings: bool = False) -> None:
+        self._delete_remote(user_id, concept, include_settings)
         where, args = ("user_id=?", (user_id,)) if concept is None else ("user_id=? AND concept=?", (user_id, concept))
         for table in ("profiles", "strategy_memory", "events"):
             self.db.execute(f"DELETE FROM {table} WHERE {where}", args)
@@ -304,6 +362,79 @@ class ProfileStore:
             self.db.execute("DELETE FROM strategy_memory WHERE user_id=? AND concept=? AND strategy=?", (user_id, concept, strategy))
             self.db.commit()
 
+    # ----------------------------------------------- bộ nhớ dài hạn: nhịp ghi
+    def note_turn(self, user_id: str) -> dict:
+        """Gọi sau mỗi lượt hỏi: đếm lượt, cứ N lượt thì nén rồi đẩy lên Supabase."""
+        n = self.mem.tick(user_id)
+        info = {"turn": n, "compacted": False, "flushed": 0}
+        if self.mem.should_compact(user_id):
+            info["compacted"] = bool(self.compact(user_id))
+        if self.mem.should_flush(user_id):
+            info["flushed"] = self.flush()
+        return info
+
+    def flush(self) -> int:
+        """Đẩy hàng đợi bộ nhớ lên Supabase (gọi khi đăng xuất / mở Sổ tay / hết N lượt)."""
+        with self.lock:
+            return self.mem.flush()
+
+    def compact(self, user_id: str, now: datetime | None = None) -> dict:
+        """Giữ bộ nhớ dài hạn gọn: bỏ chiến lược quá hạn, chỉ giữ N cách tốt nhất, cắt nhật ký cũ."""
+        now = now or utcnow()
+        ttl = iso(now - timedelta(days=self.s.strategy_ttl_days))
+        keep = max(1, int(getattr(self.s, "memory_max_strategies", 6)))
+        max_events = max(5, int(getattr(self.s, "memory_max_events", 50)))
+        removed = {"stale": 0, "extra": 0, "events": 0}
+        with self.lock:
+            stale = self.db.execute(
+                "SELECT concept, strategy FROM strategy_memory WHERE user_id=? AND last_at < ?", (user_id, ttl)).fetchall()
+            for r in stale:
+                self._forget_strategy(user_id, r["concept"], r["strategy"])
+                removed["stale"] += 1
+            concepts = [r["concept"] for r in self.db.execute(
+                "SELECT DISTINCT concept FROM strategy_memory WHERE user_id=?", (user_id,)).fetchall()]
+            for concept in concepts:
+                rows = self.db.execute(
+                    "SELECT strategy FROM strategy_memory WHERE user_id=? AND concept=? "
+                    "ORDER BY (worked - failed) DESC, last_at DESC", (user_id, concept)).fetchall()
+                for r in rows[keep:]:
+                    self._forget_strategy(user_id, concept, r["strategy"])
+                    removed["extra"] += 1
+            old_events = self.db.execute(
+                "SELECT id FROM events WHERE user_id=? ORDER BY id DESC LIMIT -1 OFFSET ?", (user_id, max_events)).fetchall()
+            for r in old_events:
+                self.db.execute("DELETE FROM events WHERE id=?", (r["id"],))
+                self.mem.queue.get("events", {}).pop(f"{user_id}:{r['id']}", None)
+                removed["events"] += 1
+            if old_events:
+                self.mem.drop("events", {"user_id": f"eq.{user_id}", "id": f"lte.{old_events[0]['id']}"})
+            self.db.commit()
+        self.mem.stats["compactions"] += 1
+        return removed if any(removed.values()) else {}
+
+    def _forget_strategy(self, user_id: str, concept: str, strategy: str) -> None:
+        self.db.execute("DELETE FROM strategy_memory WHERE user_id=? AND concept=? AND strategy=?",
+                        (user_id, concept, strategy))
+        self.mem.queue.get("strategy_memory", {}).pop(f"{user_id}:{concept}:{strategy}", None)
+        self.mem.drop("strategy_memory", {"user_id": f"eq.{user_id}", "concept": f"eq.{concept}",
+                                          "strategy": f"eq.{strategy}"})
+
+    def trim_session(self, state: dict) -> dict:
+        """Cắt trạng thái phiên để JSON lưu trên Supabase không phình theo số lượt."""
+        cap = max(2, int(getattr(self.s, "session_max_tried", 8)))
+        state = dict(state)
+        tried = state.get("tried") or {}
+        state["tried"] = {k: list(v)[-cap:] for k, v in tried.items()}
+        last = state.get("last") or {}
+        if len(last) > cap:
+            state["last"] = dict(list(last.items())[-cap:])
+        if isinstance(state.get("last_question"), str):
+            state["last_question"] = state["last_question"][:500]
+        return state
+
+    def memory_health(self) -> dict:
+        return self.mem.health()
+
     # ------------------------------------------------------------ sessions
     def session(self, session_id: str, user_id: str) -> dict:
         r = self.db.execute("SELECT state_json, user_id FROM sessions WHERE session_id=?", (session_id,)).fetchone()
@@ -313,11 +444,19 @@ class ProfileStore:
 
     def save_session(self, session_id: str, user_id: str, state: dict) -> None:
         with self.lock:
+            now_iso = iso(utcnow())
+            state = self.trim_session(state)
+            state_json = json.dumps(state, ensure_ascii=False)
             self.db.execute(
                 "INSERT OR REPLACE INTO sessions VALUES (?,?,?,?)",
-                (session_id, user_id, json.dumps(state, ensure_ascii=False), iso(utcnow())),
+                (session_id, user_id, state_json, now_iso),
             )
             self.db.commit()
+            
+            self.mem.put("sessions", session_id, {
+                "session_id": session_id, "user_id": user_id,
+                "state_json": state, "updated_at": now_iso,
+            })
 
     def reset_session(self, session_id: str) -> None:
         with self.lock:

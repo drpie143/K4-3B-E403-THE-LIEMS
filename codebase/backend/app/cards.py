@@ -7,6 +7,7 @@ from typing import Any
 
 import yaml
 
+from .cardgen import build_templates
 from .schemas import Block
 
 
@@ -76,10 +77,18 @@ class Card:
 
 
 class CardStore:
-    def __init__(self, cards_dir: Path, include_unreviewed: bool = False):
+    def __init__(self, cards_dir: Path, include_unreviewed: bool = False, lessons_path: Path | None = None):
         self.dir = Path(cards_dir)
         reg = yaml.safe_load((self.dir / "_sources.yaml").read_text(encoding="utf-8"))
-        self.lessons: dict[str, dict] = reg.get("lessons", {})
+        self.lessons: dict[str, dict] = dict(reg.get("lessons", {}))
+        # Danh mục 6 buổi học (lessons.yaml) — gộp vào để lesson_files/lesson_title dùng được cho mọi buổi.
+        lp = Path(lessons_path) if lessons_path else self.dir.parent / "lessons.yaml"
+        self.sections: dict[str, list[dict]] = {}
+        if lp.exists():
+            cat = yaml.safe_load(lp.read_text(encoding="utf-8")) or {}
+            for lid, row in (cat.get("lessons") or {}).items():
+                self.lessons[lid] = {**row, **self.lessons.get(lid, {})}
+            self.sections = cat.get("sections") or {}
         self.sources: dict[str, dict] = reg.get("sources", {})
         self.outside_terms: dict[str, list[str]] = reg.get("outside_terms", {}) or {}
         self.cards: dict[str, Card] = {}
@@ -102,7 +111,8 @@ class CardStore:
                 core_claims=d["core_claims"], approved_analogies=d.get("approved_analogies", []),
                 analogy_limits=d.get("analogy_limits", []), misconceptions=d.get("misconceptions", []),
                 outside_lesson_notes=d.get("outside_lesson_notes", []), primer=d.get("primer", {}),
-                checks=d.get("checks", []), templates=d.get("templates", {}), extras=d.get("extras", {}),
+                checks=d.get("checks", []), templates=d.get("templates") or (build_templates(d) if d.get("auto_template") else {}),
+                extras=d.get("extras", {}),
                 aspects=d.get("aspects", {}) or {},
             )
         except KeyError as exc:

@@ -2,7 +2,7 @@
  * UI của mock P3 — Trợ giảng AI trong trang học VLearn.
  * Toàn bộ "AI" ở đây là giả lập bằng engine.js; không gọi mạng.
  */
-(function () {
+(function (root) {
   "use strict";
 
   const C = window.P3_CONTENT;
@@ -248,7 +248,10 @@
   }
 
   /* ---------------- Chế độ live (backend) ---------------- */
-  function liveUser() { return API.userFor(S.personaId); }
+  function liveUser() {
+    const acc = root.P3_ACCOUNT;
+    return (acc && acc.user_id) || API.userFor(S.personaId);
+  }
 
   function liveFail(err) {
     console.warn(err);
@@ -336,13 +339,12 @@
   function handle(text, selection, opts) {
     if (LIVE) {
       const t = typing();
-      const list = C.REAL_LESSONS || [C.LESSON];
-      const cur = list[currentLessonIndex] || list[0];
+      const lid = (root.P3_LESSON_CTX && root.P3_LESSON_CTX.id) || (API.lesson && API.lesson()) || "day01-foundation-b";
       API.chat(liveUser(), {
         text, selection: selection || "",
         action: opts.forceConfused ? "confused" : "ask",
         concept_hint: opts.concept || null,
-        lesson_id: cur.id || "day01-self-attention",
+        lesson_id: lid,
       }).then((resp) => { t.remove(); renderResp(resp); renderNotebook(); })
         .catch((err) => { t.remove(); liveFail(err); handleLocal(text, selection, opts); });
       return;
@@ -1153,6 +1155,33 @@
     e.currentTarget.setAttribute("aria-expanded", String(open));
   });
 
+  /* ---------------- Cầu nối cho lessons.js / auth.js ---------------- */
+  root.P3_APP = {
+    newChat,
+    greeting,
+    renderNotebook,
+    renderDemo,
+    showTutor,
+    ask,
+    user: liveUser,
+    setUser(info) {           // gọi khi đăng nhập / đăng xuất
+      DEMO_USER.name = (info && info.name) || "bạn";
+      DEMO_USER.initial = (info && info.initial) || "?";
+      const av = $("#topAvatar");
+      if (av) av.textContent = DEMO_USER.initial;
+      greeting();
+      renderNotebook();
+    },
+    onLesson(data) {          // gọi khi đổi buổi học
+      const slide = $("#lessonSlide");
+      if (slide) {
+        // Hiện slide interactive self-attention cho bài foundation-b
+        slide.style.display = (data && data.id === "day01-foundation-b") ? "" : "none";
+      }
+      newChat();
+    },
+  };
+
   /* ---------------- Khởi động ---------------- */
   load();
   document.body.classList.toggle("dev", S.devMode);
@@ -1166,4 +1195,4 @@
     API.health().then((hh) => { LIVE_INFO.provider = hh.provider + (hh.model && hh.model !== "fake" ? " · " + hh.model : ""); renderDemo(); }).catch(liveFail);
     API.personas().then((ps) => { LIVE_INFO.personas = ps; renderDemo(); }).catch(() => {});
   }
-})();
+})(typeof window !== "undefined" ? window : this);

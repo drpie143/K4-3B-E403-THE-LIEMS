@@ -1,0 +1,52 @@
+id: solution_levels
+term: Ba mức giải pháp
+vi_name: script — tính năng LLM — agent
+lesson_id: day02-eval-data
+reviewed: true
+reviewed_by: "[nhóm E403 — TA duyệt lại trước CP4]"
+auto_template: true
+aliases: [ba mức giải pháp, script, rule based, llm feature, agent, mức giải pháp, chọn kiến trúc]
+prerequisites: []
+required_terms: [script, agent, guardrail]
+
+core_claims:
+  - id: C1
+    text: "Mức 1 — <b>script</b> theo luật: dùng khi đầu vào ổn định và logic rất rõ ràng, không cần đến mô hình."
+    src: [T05-137]
+  - id: C2
+    text: "Mức 2 — tính năng dựa trên LLM: đầu vào biến động, đầu ra cần linh hoạt, nên phải có thước đo, <b>guardrail</b> và người review."
+    src: [T05-138]
+  - id: C3
+    text: "Mức 3 — <b>agent</b>: nhiều bước, nhiều công cụ, trạng thái đổi liên tục và cần ra quyết định trong lúc chạy."
+    src: [T05-139]
+
+approved_analogies: []
+analogy_limits: []
+
+misconceptions:
+  - id: M1
+    pattern: "luon bat dau bang agent"
+    text: "Cứ bắt đầu bằng agent cho hiện đại"
+    fix: "Đi từ mức đơn giản nhất giải được việc: script trước, rồi mới tới tính năng LLM, cuối cùng mới là agent."
+    src: [T05-137]
+  - id: M2
+    pattern: "llm thi khong can guardrail"
+    text: "Dùng LLM thì không cần guardrail hay người review"
+    fix: "Ở mức 2 vẫn phải có metric, guardrail và người review vì đầu ra không cố định."
+    src: [T05-138]
+
+outside_lesson_notes:
+  - "Các pattern agent nâng cao (multi-agent, planner–executor) được nói ở buổi khác."
+
+primer:
+  html: "Trước khi code, chọn <b>mức giải pháp</b>: script theo luật, tính năng dựa trên LLM, hay agent nhiều bước."
+  src: [T05-137]
+
+checks:
+  - id: SL-Q1
+    question: "Đầu vào ổn định, luật rõ ràng thì nên chọn mức nào?"
+    options:
+      - { k: A, text: "Script theo luật", correct: true }
+      - { k: B, text: "Agent nhiều bước", misconception: M1 }
+      - { k: C, text: "Luôn phải fine-tune một mô hình riêng" }
+    src: [T05-137]
