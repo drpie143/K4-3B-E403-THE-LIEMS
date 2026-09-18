@@ -14,6 +14,44 @@ Ba phần chạy độc lập được:
 
 ## 1. Chạy thử
 
+### Windows (PowerShell)
+
+Mở PowerShell tại thư mục gốc repository:
+
+```powershell
+# (1) Tuỳ chọn: sinh dữ liệu cục bộ từ data pack — không commit
+python codebase/scripts/build_local_data.py
+# hoặc: python codebase/scripts/build_local_data.py --pack "<đường dẫn>\data\vlearn-pack"
+
+# (2) Mock + backend (AI thật hoặc FakeLLM)
+cd codebase/backend
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
+# Mở .env rồi chọn LLM_PROVIDER=fake | openai | claude | gemini
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
+# Mở http://localhost:8000/
+
+# (3) Test, mở PowerShell mới rồi chạy từ thư mục gốc repository
+cd ..\..
+node --test codebase/tests/engine.test.js
+codebase\backend\.venv\Scripts\python.exe -m pytest -q codebase\backend
+
+# (4) Đánh giá golden set
+codebase\backend\.venv\Scripts\python.exe codebase\eval\run_eval.py --round 1 --split test
+codebase\backend\.venv\Scripts\python.exe codebase\eval\run_eval.py --round 1 --split test --baseline
+```
+
+Yêu cầu Windows: cài Python 3.11+, Node.js và bật tuỳ chọn **Add Python to PATH** khi cài Python. Nếu lệnh `py` không có, thay `py -3` bằng `python`.
+
+`codebase/scripts/check_no_data.sh` là script Bash. Trên Windows, chạy bằng Git Bash hoặc WSL:
+
+```bash
+bash codebase/scripts/check_no_data.sh
+```
+
+### Linux / macOS
+
 ```bash
 # (1) Tuỳ chọn: sinh dữ liệu cục bộ từ data pack (nguyên văn đoạn nguồn, ứng viên golden set) — không commit
 python codebase/scripts/build_local_data.py            # hoặc --pack "<đường dẫn>/data/vlearn-pack"
