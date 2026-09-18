@@ -178,11 +178,11 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
   | Code (orchestrator, validator, API, nối mock) | `Ngô Anh Khoa` |
 
   Kế hoạch chi tiết 9 bước đến CP5: tài liệu backend §12.
-- **Willing users:** `Lê Thanh Tình`, `Phạm Huong Giang`, `Phạm Thành Thái` (ngoài nhóm).
+- **Willing users:** `Lê Thanh Tình`, `Phạm Hương Giang`, `Phạm Thành Thái` (ngoài nhóm).
   - Vòng validation: phiên 10 phút/người theo guide §4.2.
   - Nhiệm vụ: "hiểu self-attention đủ để trả lời câu kiểm tra".
   - Đo: số lần bấm "chưa hiểu" trước khi trả lời đúng + ghi nguyên văn.
-  - Log: `survey_responses.csv`.
+  - Log: `validation/log.md` và `survey_responses.csv`; changelog: `validation/changelog.md`.
 - **Multi-prototype:**
   - Trục khác biệt: **thời điểm hỏi chẩn đoán**.
   - **v1:** hỏi câu trắc nghiệm kiến thức trước *mọi* câu hỏi.
@@ -203,3 +203,4 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
 | 18/9 | Chốt provider OpenAI gpt-4o-mini | Chi phí tối ưu (~$0.1 toàn bộ kiểm thử) |
 | 18/9 | Tích hợp Hybrid RAG (BM25 + Cloud Vector DB) phủ trọn 700 chunks của 6 bài giảng | Mở rộng phạm vi hỏi đáp chuẩn xác cho toàn bộ 6 buổi học của BTC |
 | 18/9 | Quản lý tài khoản (PBKDF2-SHA256) & Bộ nhớ dài hạn tự nén (MemorySync) | Lưu hồ sơ mức hiểu cá nhân hóa cho từng học viên, chống phình dữ liệu |
+| 18/9 | Hoàn thành User Validation ($n=3$ ngoài nhóm); chuẩn hóa 4 nút vi chỉnh & validator thuật ngữ | Phản hồi của Lê Thanh Tình, Phạm Hương Giang, Phạm Thành Thái (`validation/log.md`, `validation/changelog.md`) |
