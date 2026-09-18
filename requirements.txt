@@ -1,0 +1,19 @@
+# Runtime — cài vào venv, không cài global:
+#   python3 -m venv venv
+#   source venv/bin/activate
+#   pip install -r requirements.txt
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+pydantic==2.13.5
+pydantic-settings==2.15.0
+python-dotenv==1.2.3
+langgraph==1.2.11
+langchain-core==1.6.3
+openai==3.15.0
+httpx==0.28.1
+SQLAlchemy==2.0.54
+asyncpg==0.31.0
+alembic==1.20.0
+PyYAML==6.0.3
+redis==5.2.1
+qdrant-client==1.13.3

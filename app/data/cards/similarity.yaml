@@ -1,0 +1,27 @@
+id: similarity
+term: Similarity score
+vi_name: điểm liên quan
+lesson_id: day01-self-attention
+reviewed: true
+reviewed_by: "[tên TA/nhóm]"
+aliases: [similarity, điểm tương đồng, độ tương đồng, similarity score]
+prerequisites: [vector]
+required_terms: [similarity score]
+core_claims:
+  - id: C1
+    text: Các token so với nhau trong không gian vector để ra điểm liên quan (similarity score).
+    src: [T06-128, T06-130]
+approved_analogies: []
+analogy_limits: []
+misconceptions: []
+outside_lesson_notes: []
+primer:
+  html: "<b>Similarity score</b> là điểm cho biết hai token liên quan nhau đến đâu, tính từ vector của chúng."
+  src: [T06-128, T06-130]
+checks: []
+templates:
+  first:
+    - t: p
+      html: "<b>Similarity score</b> là điểm cho biết hai token liên quan nhau đến đâu, tính từ vector của chúng."
+      src: [T06-128, T06-130]
+      claims: [C1]

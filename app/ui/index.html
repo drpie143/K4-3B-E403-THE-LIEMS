@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VLearn Adaptive Tutor</title>
+  <meta name="description" content="Mock bấm được cho P3 — Trợ giảng AI giải thích lại đúng mức khi học viên chưa hiểu." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
+</head>
+<body>
+  <!-- SVG dùng chung -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="spark" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#3b6cf6" />
+        <stop offset="1" stop-color="#9b4de0" />
+      </linearGradient>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path fill="url(#spark)" d="M12 1.5c.5 4.9 2.2 8 10.5 10.5-8.3 2.5-10 5.6-10.5 10.5-.5-4.9-2.2-8-10.5-10.5C9.8 9.5 11.5 6.4 12 1.5Z"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5m6-7-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11m0-6.5V3.5a1.5 1.5 0 0 1 3 0V11m0-6a1.5 1.5 0 0 1 3 0v6m0-3.5a1.5 1.5 0 0 1 3 0V15a7 7 0 0 1-7 7h-1a7 7 0 0 1-5.6-2.8L3.2 15.6a1.6 1.6 0 0 1 2.4-2.1L8 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7 15h10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6M3 4v4h4m5-.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-panel" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 14h16" stroke="currentColor" stroke-width="1.8"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5v-15Zm16 0A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5v-15Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+      <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 11v9H4v-9h3Zm0 0 4-7a2 2 0 0 1 2.5 2.4L12.8 10H18a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 16.8 20H7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+      <symbol id="i-dn" viewBox="0 0 24 24"><g transform="rotate(180 12 12)"><path d="M7 11v9H4v-9h3Zm0 0 4-7a2 2 0 0 1 2.5 2.4L12.8 10H18a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 16.8 20H7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></g></symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4m0 0h11l-2 4 2 4H5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v4h4M9.5 12h6M9.5 15.5h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5m0-8.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6m-5 3h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="topbar">
+    <button class="back" aria-label="Quay lại"><svg width="22" height="22"><use href="#i-back"/></svg></button>
+    <h1 id="lessonDay">Bài 1 · Day01</h1>
+    <div class="spacer"></div>
+    <div class="progress">0/25 bài <div class="bar"></div></div>
+    <button class="top-btn active" id="askAiBtn" aria-pressed="true"><svg width="18" height="18"><use href="#i-spark"/></svg><span class="txt">Đặt câu hỏi với AI</span></button>
+    <button class="top-btn" id="requestBtn"><svg width="18" height="18"><use href="#i-hand"/></svg><span class="txt">Gửi yêu cầu</span></button>
+    <div class="avatar" id="topAvatar" aria-label="Tài khoản">Đ</div>
+  </header>
+
+  <div class="shell">
+    <!-- Sidebar nội dung bài học -->
+    <nav class="sidebar" aria-label="Nội dung bài học">
+      <div class="side-head"><h2>NỘI DUNG BÀI HỌC</h2><button class="icon-btn" aria-label="Đóng"><svg width="18" height="18"><use href="#i-x"/></svg></button></div>
+      <button class="side-row">Slides <svg width="18" height="18"><use href="#i-chev"/></svg></button>
+      <button class="side-row">Video <svg width="18" height="18"><use href="#i-chev"/></svg></button>
+      <div class="side-group">
+        <div class="gtitle"><svg width="20" height="20"><use href="#i-flask"/></svg><span style="flex:1">Day01-LLM-Foundation</span><svg width="18" height="18"><use href="#i-down"/></svg></div>
+        <div id="sideItems"></div>
+      </div>
+      <div class="side-foot">
+        <button class="link-btn" id="openNotebookSide"><svg width="18" height="18"><use href="#i-book"/></svg>Sổ tay học tập</button>
+      </div>
+    </nav>
+
+    <!-- Nội dung bài -->
+    <main class="main" id="main">
+      <article class="lesson">
+        <div class="crumb"><i></i>Day01 – LLM Foundation</div>
+        <h2>Self-attention</h2>
+        <span class="tag">Bài học lý thuyết</span>
+
+        <div class="slide" aria-label="Minh hoạ self-attention">
+          <h3>Self-attention</h3>
+          <div class="sub">Mỗi token nhìn các token khác — cùng lúc</div>
+          <div class="sentence">
+            <span class="tok">Con</span><span class="tok">mèo</span><span class="tok">ngồi</span><span class="tok">lên</span><span class="tok">bàn,</span><span class="tok q">nó</span><span class="tok">rất</span><span class="tok">đáng</span><span class="tok">yêu</span>
+          </div>
+          <div class="weights">
+            <span>“nó” → mèo</span><div class="w"><span style="width:72%"></span></div><span>0.72</span>
+            <span>“nó” → bàn</span><div class="w"><span style="width:14%"></span></div><span>0.14</span>
+            <span>“nó” → đáng yêu</span><div class="w"><span style="width:9%"></span></div><span>0.09</span>
+          </div>
+          <div class="qkv"><div><b>Q</b> Query · token đang hỏi</div><div><b>K</b> Key · nhãn để so khớp</div><div><b>V</b> Value · thông tin lấy về</div></div>
+          <div class="note">Số minh hoạ, không phải trọng số thật</div>
+        </div>
+
+        <div class="lesson-body" id="lessonBody">
+          <p>Sau khi mỗi token được chuyển thành vector, các token trong câu nhìn lẫn nhau để tìm ra điểm tương đồng (similarity score). Đây là bước quan trọng nhất của Transformer, và các token làm việc này song song. <span class="src">[T06-126, T06-128]</span></p>
+          <p>Ví dụ câu “Con mèo ngồi lên bàn, nó rất đáng yêu”: làm sao mô hình biết “nó” là con mèo hay cái bàn? Self-attention tính mức liên quan giữa “nó” với từng token khác, và “mèo” có điểm cao nhất. <span class="src">[T06-129, T06-132]</span></p>
+          <p>Công thức dùng ba thành phần Q (query), K (key), V (value) cùng hàm softmax. Giảng viên ví von bằng thư viện: nhãn bên ngoài cuốn sách là key, nội dung bên trong là value. <span class="src">[T06-130, T06-131]</span></p>
+          <p id="tooLong" class="too-long" hidden>Đoạn chọn quá dài để đánh dấu.</p>
+        </div>
+
+        <div class="card">
+          <h4><svg width="18" height="18"><use href="#i-check"/></svg>Nội dung chính</h4>
+          <ul>
+            <li>Self-attention là gì và vì sao gọi là “nhìn song song”</li>
+            <li>Query – Key – Value qua ví dụ thư viện</li>
+            <li>Ví dụ “con mèo ngồi trên bàn”</li>
+            <li>Lab demo: trực quan hoá self-attention với bertviz</li>
+          </ul>
+        </div>
+
+        <div class="feedback-row">
+          <button class="icon-btn" aria-label="Thích"><svg width="22" height="22"><use href="#i-up"/></svg></button>
+          <button class="icon-btn" aria-label="Không thích"><svg width="22" height="22"><use href="#i-dn"/></svg></button>
+          <button class="icon-btn" aria-label="Báo lỗi"><svg width="22" height="22"><use href="#i-flag"/></svg></button>
+        </div>
+        <div class="nav-row">
+          <button class="btn"><svg width="16" height="16" style="transform:rotate(180deg)"><use href="#i-chev"/></svg>Bài trước</button>
+          <button class="btn primary">Đi tới bài tiếp theo<svg width="16" height="16"><use href="#i-chev"/></svg></button>
+        </div>
+      </article>
+    </main>
+
+    <!-- Trợ giảng AI -->
+    <aside class="tutor" id="tutor" aria-label="Trợ giảng AI">
+      <div class="t-head">
+        <svg width="26" height="26"><use href="#i-spark"/></svg>
+        <span class="name">Trợ giảng AI</span>
+        <button class="new" id="newChat" aria-label="Chat mới"><svg width="16" height="16"><use href="#i-plus"/></svg><span class="txt">Chat mới</span></button>
+        <button class="icon-btn" id="notebookBtn" aria-label="Sổ tay học tập" title="Sổ tay học tập"><svg width="20" height="20"><use href="#i-book"/></svg></button>
+        <button class="icon-btn" id="historyBtn" aria-label="Lịch sử" title="Lịch sử chat"><svg width="20" height="20"><use href="#i-history"/></svg></button>
+        <button class="icon-btn" id="wideBtn" aria-label="Mở rộng" title="Mở rộng khung chat"><svg width="20" height="20"><use href="#i-panel"/></svg></button>
+        <button class="icon-btn" id="closeTutor" aria-label="Đóng"><svg width="20" height="20"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="t-body" id="chat" aria-live="polite"></div>
+      <div class="t-foot">
+        <div class="sel-chip" id="selChip" hidden><svg width="14" height="14"><use href="#i-doc"/></svg><span id="selText"></span><button class="icon-btn" id="selClear" aria-label="Bỏ đoạn đã chọn"><svg width="14" height="14"><use href="#i-x"/></svg></button></div>
+        <form class="composer" id="composer">
+          <input id="input" autocomplete="off" placeholder="Hỏi bất cứ điều gì..." aria-label="Câu hỏi cho Trợ giảng AI" />
+          <button class="send" id="sendBtn" aria-label="Gửi"><svg width="18" height="18"><use href="#i-send"/></svg></button>
+        </form>
+        <div class="disclaimer">Trợ giảng AI có thể sai — hãy đối chiếu với bài giảng.</div>
+      </div>
+    </aside>
+  </div>
+
+  <button class="sel-pop" id="selPop"><svg width="14" height="14"><use href="#i-spark"/></svg>Hỏi Trợ giảng AI</button>
+
+  <!-- Sổ tay học tập -->
+  <div class="overlay" id="notebook" role="dialog" aria-modal="true" aria-labelledby="nbTitle">
+    <div class="modal">
+      <header>
+        <svg width="22" height="22"><use href="#i-book"/></svg>
+        <h3 id="nbTitle">Sổ tay học tập · Mức hiểu của bạn</h3>
+        <button class="icon-btn" data-close aria-label="Đóng"><svg width="18" height="18"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="content" id="nbContent"></div>
+    </div>
+  </div>
+
+  <!-- Đoạn nguồn -->
+  <div class="overlay" id="sourceView" role="dialog" aria-modal="true" aria-labelledby="srcTitle">
+    <div class="modal">
+      <header>
+        <svg width="22" height="22"><use href="#i-doc"/></svg>
+        <h3 id="srcTitle">Đoạn gốc</h3>
+        <button class="icon-btn" data-close aria-label="Đóng"><svg width="18" height="18"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="content" id="srcContent"></div>
+    </div>
+  </div>
+
+  <!-- Bảng điều khiển demo -->
+  <button class="demo-toggle" id="demoToggle" aria-expanded="false"><svg width="16" height="16"><use href="#i-flask"/></svg>Kịch bản demo</button>
+  <div class="demo" id="demo"></div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="js/content.js"></script>
+  <!-- Sinh trên máy bởi scripts/build_local_data.py, KHÔNG commit. Thiếu file thì mock dùng tóm tắt. -->
+  <script src="data/sources.local.js" onerror="window.VLEARN_SOURCES_LOCAL = null"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

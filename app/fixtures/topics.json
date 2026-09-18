@@ -1,0 +1,10 @@
+{
+  "self_attention": ["self-attention", "self attention", "attention", "tự chú ý", "query", "key", "value", "qkv", "trọng số"],
+  "vector": ["vector", "vecto", "vectơ", "embedding", "nhúng"],
+  "token": ["token", "tokens"],
+  "rag": ["rag", "retrieval augmented", "retrieval-augmented", "retriever"],
+  "docker": ["docker", "volume", "container", "dockerfile"],
+  "fine_tune": ["fine-tune", "finetune", "fine tune", "sft"],
+  "embedding": ["embedding", "vector db", "qdrant", "chroma"],
+  "prompt": ["prompt", "system prompt", "prompt engineering"]
+}

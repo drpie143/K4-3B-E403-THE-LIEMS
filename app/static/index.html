@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Adaptive Explainer MVP</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --panel: #1a2332;
+      --line: #2a3a4f;
+      --text: #e8eef7;
+      --muted: #93a4bb;
+      --accent: #5eead4;
+      --probe: #fbbf24;
+      --eli5: #86efac;
+      --tech: #93c5fd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg); color: var(--text); height: 100vh;
+      display: grid; grid-template-columns: 1fr 280px;
+    }
+    header {
+      grid-column: 1 / -1; padding: 14px 20px; border-bottom: 1px solid var(--line);
+      display: flex; gap: 16px; align-items: baseline;
+    }
+    header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+    header span { color: var(--muted); font-size: 13px; }
+    main { display: flex; flex-direction: column; min-height: 0; }
+    #log { flex: 1; overflow: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .bubble { max-width: 720px; padding: 12px 14px; border-radius: 12px; line-height: 1.45; font-size: 14px; white-space: pre-wrap; }
+    .user { align-self: flex-end; background: #243044; }
+    .bot { align-self: flex-start; background: var(--panel); border: 1px solid var(--line); }
+    .meta { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .choices { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .choices button, .chips button, #send {
+      background: #0f172a; color: var(--text); border: 1px solid var(--line);
+      border-radius: 8px; padding: 8px 10px; cursor: pointer; text-align: left;
+    }
+    .choices button:hover, .chips button:hover, #send:hover { border-color: var(--accent); }
+    .composer { padding: 12px 20px 18px; border-top: 1px solid var(--line); }
+    .row { display: flex; gap: 8px; }
+    textarea {
+      flex: 1; resize: none; height: 64px; background: var(--panel); color: var(--text);
+      border: 1px solid var(--line); border-radius: 8px; padding: 8px;
+    }
+    .chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    aside { border-left: 1px solid var(--line); padding: 16px; font-size: 13px; color: var(--muted); }
+    aside h2 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px; }
+    aside dl { margin: 0 0 18px; }
+    aside dt { color: var(--muted); }
+    aside dd { margin: 0 0 8px; color: var(--text); }
+    .kind-probe .meta { color: var(--probe); }
+    .kind-explanation .meta { color: var(--eli5); }
+    label { display: block; font-size: 11px; margin-bottom: 4px; }
+    input {
+      width: 100%; background: var(--panel); border: 1px solid var(--line); color: var(--text);
+      border-radius: 6px; padding: 6px 8px; margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Adaptive Explainer</h1>
+    <span>MVP core backend · probe → chấm trình độ → giải thích vừa tầm</span>
+  </header>
+  <main>
+    <div id="log"></div>
+    <div class="composer">
+      <div class="row">
+        <textarea id="msg" placeholder="Bôi đen khái niệm và hỏi, ví dụ: RAG là gì?"></textarea>
+        <button id="send">Gửi</button>
+      </div>
+      <div class="chips">
+        <button data-text="khó hiểu quá">Khó quá</button>
+        <button data-text="nâng cao hơn">Nâng cao hơn</button>
+        <button data-text="ngắn lại">Ngắn lại</button>
+        <button data-text="Docker volume là gì?">Hỏi Docker</button>
+      </div>
+    </div>
+  </main>
+  <aside>
+    <h2>Session</h2>
+    <label>user_id</label>
+    <input id="user" value="hv-01" />
+    <label>API key</label>
+    <input id="key" value="dev-key" />
+    <dl>
+      <dt>kind</dt><dd id="s-kind">—</dd>
+      <dt>user_level</dt><dd id="s-level">unknown</dd>
+      <dt>topic</dt><dd id="s-topic">—</dd>
+      <dt>mode</dt><dd id="s-mode">—</dd>
+      <dt>route</dt><dd id="s-route">—</dd>
+    </dl>
+    <h2>Skill map</h2>
+    <pre id="skills" style="white-space:pre-wrap;color:var(--text)">{}</pre>
+  </aside>
+  <script>
+    const log = document.getElementById("log");
+    let conversationId = null;
+    const sessionId = "sess-mvp";
+
+    function addBubble(role, text, extra) {
+      const el = document.createElement("div");
+      el.className = "bubble " + (role === "user" ? "user" : "bot") + (extra && extra.kind ? " kind-" + extra.kind : "");
+      if (extra && extra.kind) {
+        const m = document.createElement("div");
+        m.className = "meta";
+        m.textContent = extra.kind + (extra.mode ? " · " + extra.mode : "") + (extra.level ? " · " + extra.level : "");
+        el.appendChild(m);
+      }
+      const body = document.createElement("div");
+      body.textContent = text;
+      el.appendChild(body);
+      if (extra && extra.choices && extra.choices.length) {
+        const box = document.createElement("div");
+        box.className = "choices";
+        extra.choices.forEach(c => {
+          const b = document.createElement("button");
+          b.textContent = c.text;
+          b.onclick = () => send(c.text);
+          box.appendChild(b);
+        });
+        el.appendChild(box);
+      }
+      log.appendChild(el);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function refreshProfile() {
+      const user = document.getElementById("user").value;
+      const key = document.getElementById("key").value;
+      const r = await fetch("/v1/profile/" + user, { headers: { "X-API-Key": key } });
+      if (!r.ok) return;
+      const j = await r.json();
+      document.getElementById("skills").textContent = JSON.stringify(j.skill_map, null, 2);
+    }
+
+    async function send(text) {
+      const msg = (text ?? document.getElementById("msg").value).trim();
+      if (!msg) return;
+      document.getElementById("msg").value = "";
+      addBubble("user", msg);
+      const body = {
+        user_id: document.getElementById("user").value,
+        session_id: sessionId,
+        conversation_id: conversationId,
+        client_turn_id: crypto.randomUUID(),
+        message: msg,
+        context: {
+          lecture_id: msg.toLowerCase().includes("docker") ? "k4-week4-docker" : "k4-week3-rag",
+          slide_page: msg.toLowerCase().includes("docker") ? 4 : 12,
+          highlighted_text: msg.toLowerCase().includes("docker") ? "Docker volume" : (msg.toLowerCase().includes("rag") ? "RAG" : null)
+        }
+      };
+      const r = await fetch("/v1/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-API-Key": document.getElementById("key").value },
+        body: JSON.stringify(body)
+      });
+      const j = await r.json();
+      if (!r.ok) {
+        addBubble("bot", (j.error && j.error.message) || r.statusText, { kind: "error" });
+        return;
+      }
+      conversationId = j.conversation_id;
+      document.getElementById("s-kind").textContent = j.kind;
+      document.getElementById("s-level").textContent = j.user_level;
+      document.getElementById("s-topic").textContent = j.topic_key;
+      document.getElementById("s-mode").textContent = j.explanation_mode || "—";
+      document.getElementById("s-route").textContent = j.route_reason;
+      addBubble("bot", j.content, { kind: j.kind, mode: j.explanation_mode, level: j.user_level, choices: j.choices });
+      refreshProfile();
+    }
+
+    document.getElementById("send").onclick = () => send();
+    document.getElementById("msg").addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+    document.querySelectorAll(".chips button").forEach(b => b.onclick = () => send(b.dataset.text));
+    refreshProfile();
+  </script>
+</body>
+</html>

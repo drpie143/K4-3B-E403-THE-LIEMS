@@ -1,0 +1,38 @@
+{
+  "self_attention": {
+    "question": "Để giải thích self-attention vừa tầm, bạn đang ở đâu với vector / token?",
+    "choices": [
+      {"id": "a", "text": "Mới bắt đầu, chưa rõ token và vector", "maps_to_level": "beginner"},
+      {"id": "b", "text": "Biết token/vector, chưa nắm Query-Key-Value", "maps_to_level": "intermediate"},
+      {"id": "c", "text": "Đã hiểu Q·K và softmax, cần cơ chế và trade-off", "maps_to_level": "advanced"}
+    ],
+    "targets_prerequisite": "token_vector"
+  },
+  "rag": {
+    "question": "Để giải thích RAG vừa tầm, bạn đang ở đâu với database / search?",
+    "choices": [
+      {"id": "a", "text": "Mới bắt đầu, chưa làm việc với database", "maps_to_level": "beginner"},
+      {"id": "b", "text": "Đã từng query SQL / search, chưa đụng vector DB", "maps_to_level": "intermediate"},
+      {"id": "c", "text": "Đã dùng embedding / vector search trong project", "maps_to_level": "advanced"}
+    ],
+    "targets_prerequisite": "database_or_search"
+  },
+  "docker": {
+    "question": "Bạn đã từng chạy container hay mới bắt đầu với Docker?",
+    "choices": [
+      {"id": "a", "text": "Mới nghe, chưa cài Docker", "maps_to_level": "beginner"},
+      {"id": "b", "text": "Đã docker run / compose, chưa rõ volume", "maps_to_level": "intermediate"},
+      {"id": "c", "text": "Đã thiết kế volume/network cho production", "maps_to_level": "advanced"}
+    ],
+    "targets_prerequisite": "containers"
+  },
+  "generic": {
+    "question": "Để giải thích dễ hiểu hơn, nền tảng của bạn đang ở đâu?",
+    "choices": [
+      {"id": "a", "text": "Mới bắt đầu, chưa có nền tảng", "maps_to_level": "beginner"},
+      {"id": "b", "text": "Đã học căn bản, muốn gắn với bài giảng", "maps_to_level": "intermediate"},
+      {"id": "c", "text": "Đã làm thực tế, cần cơ chế và trade-off", "maps_to_level": "advanced"}
+    ],
+    "targets_prerequisite": "general"
+  }
+}

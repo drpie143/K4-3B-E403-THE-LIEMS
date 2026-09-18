@@ -1,0 +1,51 @@
+# Hồ sơ GIẢ cho demo và eval — không phải dữ liệu học viên thật.
+# days_ago: số ngày kể từ tín hiệu cuối (để minh hoạ "quên dần").
+demo-moi:
+  label: Người mới
+  preferred_style: vi_du
+  concepts:
+    token: { level: biet_so, source: tu_khai, days_ago: 1 }
+    vector: { level: chua, source: tu_khai, days_ago: 1 }
+    similarity: { level: chua, source: tu_khai, days_ago: 1 }
+    self_attention: { level: chua, source: tu_khai, days_ago: 1 }
+demo-trung-binh:
+  label: Trung bình
+  preferred_style: ngan_gon
+  concepts:
+    token: { level: hieu_ro, source: kiem_tra, days_ago: 1 }
+    vector: { level: biet_so, source: tu_khai, days_ago: 1 }
+    similarity: { level: biet_so, source: tu_khai, days_ago: 1 }
+    self_attention: { level: biet_so, source: tu_khai, days_ago: 1 }
+demo-vung:
+  label: Đã vững
+  preferred_style: chi_tiet
+  concepts:
+    token: { level: hieu_ro, source: kiem_tra, days_ago: 1 }
+    vector: { level: hieu_ro, source: kiem_tra, days_ago: 1 }
+    similarity: { level: hieu_ro, source: kiem_tra, days_ago: 1 }
+    self_attention: { level: biet_so, source: kiem_tra, days_ago: 1 }
+demo-moi-toanh:
+  label: Chưa có hồ sơ
+  preferred_style: null
+  concepts: {}
+demo-lau-ngay:
+  label: Lâu ngày không học
+  preferred_style: ngan_gon
+  concepts:
+    token: { level: hieu_ro, source: kiem_tra, days_ago: 16 }
+    vector: { level: hieu_ro, source: kiem_tra, days_ago: 16 }
+    similarity: { level: hieu_ro, source: kiem_tra, days_ago: 16 }
+    self_attention: { level: hieu_ro, source: kiem_tra, days_ago: 16 }
+demo-thu-vien:
+  label: Từng hiểu nhờ ví dụ thư viện
+  preferred_style: vi_du
+  concepts:
+    token: { level: hieu_ro, source: kiem_tra, days_ago: 2 }
+    vector: { level: chua, source: tu_khai, days_ago: 2 }
+    similarity: { level: biet_so, source: tu_khai, days_ago: 2 }
+    self_attention: { level: chua, source: tu_khai, days_ago: 2 }
+  strategies:
+    self_attention:
+      - { strategy: "analogy:thu_vien", worked: 1, failed: 0, days_ago: 2 }
+      - { strategy: "analogy:con_meo", worked: 0, failed: 2, days_ago: 2 }
+      - { strategy: "style:chi_tiet", worked: 0, failed: 2, days_ago: 2 }
