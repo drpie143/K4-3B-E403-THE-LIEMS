@@ -30,3 +30,5 @@ node_modules/
 
 # Do not commit raw survey or raw data packs
 survey_responses.csv
+data/
+/data/
