@@ -7,6 +7,25 @@
 -- 1. Kích hoạt extension pgvector phục vụ lưu trữ và tìm kiếm vector
 CREATE EXTENSION IF NOT EXISTS vector;
 
+-- 1b. Bảng lưu trữ tài khoản người dùng
+CREATE TABLE IF NOT EXISTS accounts (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  display_name TEXT,
+  password_hash TEXT NOT NULL,
+  role TEXT DEFAULT 'learner',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  last_login_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 1c. Bảng lưu trữ phiên đăng nhập (Sessions)
+CREATE TABLE IF NOT EXISTS account_sessions (
+  token_hash TEXT PRIMARY KEY,
+  account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ NOT NULL
+);
+
 -- 2. Bảng lưu trữ hồ sơ mức độ hiểu của học viên theo từng khái niệm
 CREATE TABLE IF NOT EXISTS profiles (
   user_id TEXT NOT NULL,
