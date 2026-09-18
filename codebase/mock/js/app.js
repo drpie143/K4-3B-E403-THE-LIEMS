@@ -115,12 +115,27 @@
   /* ---------------- Sidebar ---------------- */
   function renderSidebar() {
     const items = [
-      ["Giới thiệu buổi học", "done"],
-      ["AI, ML, DL và foundation model", "done"],
-      ["Transformer — trái tim của LLM", "done"],
-      ["Self-attention", "active"],
-      ["Token và dự đoán next token", ""],
-      ["Lab demo: trực quan hoá self-attention", ""],
+      [`Giới thiệu giảng viên và khảo sát làm quen lớp`, "active"],
+      [`Nội dung buổi học`, ""],
+      [`AI, machine learning, deep learning và foundation model`, ""],
+      [`Ba nhóm AI và lịch sử phát triển`, ""],
+      [`Vì sao 2025-2026 là bước ngoặt`, ""],
+      [`Hỏi đáp về phạm vi và lộ trình khóa học`, ""],
+      [`LLM: encoder–decoder, transformer và attention`, ""],
+      [`Trò chuyện bên lề trong lúc phát thẻ: hành trình công nghệ và Google Developer Expert`, ""],
+      [`Trao đổi về hệ thống LMS học viên đang xây`, ""],
+      [`Google trong giáo dục K12 (kết phần chia sẻ)`, ""],
+      [`Transformer — trái tim của LLM`, ""],
+      [`Self-attention: ví dụ "con mèo ngồi trên bàn" và công thức Q–K–V`, ""],
+      [`Token và cơ chế dự đoán next token`, ""],
+      [`Vì sao có hallucination — bias dữ liệu và quá trình huấn luyện`, ""],
+      [`LLM được tạo ra như thế nào — ba giai đoạn huấn luyện`, ""],
+      [`Giới hạn của LLM: knowledge cutoff, hallucination, context window`, ""],
+      [`Khảo sát API và Q&A: hệ thống production có gọi API`, ""],
+      [`Token economy và chi phí API`, ""],
+      [`Chọn mô hình và context window trong thiết kế hệ thống`, ""],
+      [`Tổng kết buổi học`, ""],
+      [`Lab demo: trực quan hóa self-attention ([TA] hướng dẫn)`, ""],
     ];
     const box = $("#sideItems");
     items.forEach(([label, st], i) => {

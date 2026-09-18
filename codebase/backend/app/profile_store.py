@@ -62,6 +62,8 @@ class ProfileStore:
         self.lock = threading.RLock()
         pp = settings.personas_path
         self.personas: dict[str, dict] = yaml.safe_load(Path(pp).read_text(encoding="utf-8")) if Path(pp).exists() else {}
+        from .supabase_client import SupabaseClient
+        self.sb = SupabaseClient(settings.supabase_url, settings.supabase_key) if getattr(settings, "supabase_url", None) else None
 
     # ------------------------------------------------------------ users
     def ensure_user(self, user_id: str, now: datetime | None = None) -> None:
@@ -106,6 +108,18 @@ class ProfileStore:
             if preferred_style is not None or clear_style:
                 self.db.execute("UPDATE settings SET preferred_style=? WHERE user_id=?", (None if clear_style else preferred_style, user_id))
             self.db.commit()
+            
+            if self.sb and self.sb.is_configured():
+                try:
+                    r = self.db.execute("SELECT memory_on, preferred_style FROM settings WHERE user_id=?", (user_id,)).fetchone()
+                    if r:
+                        self.sb.upsert("settings", {
+                            "user_id": user_id, 
+                            "memory_on": r["memory_on"], 
+                            "preferred_style": r["preferred_style"]
+                        })
+                except Exception:
+                    pass
 
     # ------------------------------------------------------------ reads
     def profile(self, user_id: str, now: datetime | None = None) -> dict[str, Any]:
@@ -182,6 +196,15 @@ class ProfileStore:
             "INSERT INTO events (user_id, concept, type, payload, before_json, created_at) VALUES (?,?,?,?,?,?)",
             (user_id, concept, etype, json.dumps(payload, ensure_ascii=False), before, iso(now)),
         )
+        if self.sb and self.sb.is_configured():
+            try:
+                self.sb.upsert("events", {
+                    "user_id": user_id, "concept": concept, "type": etype,
+                    "payload": payload, "before_json": json.loads(before) if before else {},
+                    "created_at": iso(now),
+                })
+            except Exception:
+                pass
         return int(cur.lastrowid)
 
     def apply_event(self, user_id: str, concept: str, etype: str, level: str | None = None, now: datetime | None = None) -> Notice | None:
@@ -237,6 +260,14 @@ class ProfileStore:
             (user_id, concept, lvl, streak, source, iso(now), iso(now)),
         )
         self.db.commit()
+        if self.sb and self.sb.is_configured():
+            try:
+                self.sb.upsert("profiles", {
+                    "user_id": user_id, "concept": concept, "level": lvl, "streak": streak,
+                    "source": source, "updated_at": iso(now), "last_signal_at": iso(now),
+                })
+            except Exception:
+                pass
 
     def record_strategy(self, user_id: str, concept: str, strategies: list[str], outcome: str, now: datetime | None = None) -> None:
         """Ghi cách giải thích đã hiệu quả / chưa hiệu quả (§7.4.3)."""
@@ -258,6 +289,16 @@ class ProfileStore:
                     f"UPDATE strategy_memory SET {outcome} = {outcome} + 1, last_at=? WHERE user_id=? AND concept=? AND strategy=?",
                     (iso(now), user_id, concept, sname),
                 )
+                if self.sb and self.sb.is_configured():
+                    try:
+                        r = self.db.execute("SELECT worked, failed FROM strategy_memory WHERE user_id=? AND concept=? AND strategy=?", (user_id, concept, sname)).fetchone()
+                        if r:
+                            self.sb.upsert("strategy_memory", {
+                                "user_id": user_id, "concept": concept, "strategy": sname,
+                                "worked": r["worked"], "failed": r["failed"], "last_at": iso(now),
+                            })
+                    except Exception:
+                        pass
             self._log(user_id, concept, f"strategy_{outcome}", {"strategies": strategies}, before, now)
             self.db.commit()
 
@@ -313,11 +354,24 @@ class ProfileStore:
 
     def save_session(self, session_id: str, user_id: str, state: dict) -> None:
         with self.lock:
+            now_iso = iso(utcnow())
+            state_json = json.dumps(state, ensure_ascii=False)
             self.db.execute(
                 "INSERT OR REPLACE INTO sessions VALUES (?,?,?,?)",
-                (session_id, user_id, json.dumps(state, ensure_ascii=False), iso(utcnow())),
+                (session_id, user_id, state_json, now_iso),
             )
             self.db.commit()
+            
+            if self.sb and self.sb.is_configured():
+                try:
+                    self.sb.upsert("sessions", {
+                        "session_id": session_id,
+                        "user_id": user_id,
+                        "state_json": state_json,
+                        "updated_at": now_iso
+                    })
+                except Exception:
+                    pass
 
     def reset_session(self, session_id: str) -> None:
         with self.lock:

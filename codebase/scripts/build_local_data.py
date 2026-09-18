@@ -19,12 +19,25 @@ import re
 import sys
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
 REPO = Path(__file__).resolve().parents[2]
 CODEBASE = REPO / "codebase"
+BACKEND_DATA = CODEBASE / "backend" / "Data"
 DEFAULT_PACK = REPO.parent / "ĐỌC ĐỀ" / "K4-3B-Day05-06-AI-Product-Hackathon" / "data" / "vlearn-pack"
-TRANSCRIPTS = ["transcript-04-clean.md", "transcript-06-clean.md"]
+TRANSCRIPTS = [f"transcript-0{i}-clean.md" for i in range(1, 7)]
 PARA_RE = re.compile(r"^\*\*\[(T\d{2}-\d{3})\]\*\*\s*(.*)$")
 MAX_CHARS = 900
+
+# Thêm backend vào sys.path để dùng module chunking
+sys.path.insert(0, str(CODEBASE / "backend"))
+try:
+    from app.chunking import parse_transcript_file, chunk_paragraphs_three_tier, Paragraph
+except ImportError:
+    parse_transcript_file = None
 
 # Lượt chatlog dùng làm ứng viên golden set (chỉ K4, câu học viên nói chưa hiểu / hỏi lại / ngoài phạm vi).
 GOLDEN_TURNS = ["T10728", "T10317", "T10536", "T10480", "T10508", "T10807", "T10709", "T10319", "T10326", "T10599", "T10744", "T10502"]
@@ -32,24 +45,46 @@ CONFUSED_RE = re.compile(r"không hiểu|chưa hiểu|khó hiểu|giải thích 
 
 
 def find_pack(arg):
-    for cand in [arg, os.environ.get("VLEARN_PACK"), DEFAULT_PACK]:
-        if cand and (Path(cand) / "transcript").is_dir():
-            return Path(cand)
-    sys.exit("Không tìm thấy vlearn-pack. Dùng --pack hoặc biến VLEARN_PACK.")
+    candidates = [
+        Path(arg) if arg else None,
+        BACKEND_DATA,
+        Path(os.environ["VLEARN_PACK"]) if "VLEARN_PACK" in os.environ else None,
+        DEFAULT_PACK,
+    ]
+    for cand in candidates:
+        if cand and (cand / "transcript").is_dir():
+            return cand
+        if cand and (cand.name == "transcript" and cand.is_dir()):
+            return cand.parent
+    sys.exit("Không tìm thấy thư mục transcript. Dùng --pack hoặc đặt trong codebase/backend/Data/transcript.")
 
 
-def read_paragraphs(pack):
-    chunks = []
+def read_chunks_with_overlap(pack):
+    trans_dir = pack / "transcript" if (pack / "transcript").is_dir() else pack
+    all_paras: list[Paragraph] = []
+    
     for name in TRANSCRIPTS:
-        section = ""
-        for line in (pack / "transcript" / name).read_text(encoding="utf-8").splitlines():
-            if line.startswith("## "):
-                section = line[3:].strip()
-                continue
-            m = PARA_RE.match(line)
-            if m:
-                chunks.append({"id": m.group(1), "file": name, "section": section, "text": m.group(2).strip()})
-    return chunks
+        fp = trans_dir / name
+        if not fp.exists():
+            continue
+        if parse_transcript_file:
+            all_paras.extend(parse_transcript_file(fp))
+        else:
+            section = ""
+            for line in fp.read_text(encoding="utf-8").splitlines():
+                if line.startswith("## "):
+                    section = line[3:].strip()
+                    continue
+                m = PARA_RE.match(line)
+                if m:
+                    all_paras.append(Paragraph(id=m.group(1), section=section, file=name, text=m.group(2).strip()))
+
+    if parse_transcript_file:
+        chunks_objs = chunk_paragraphs_three_tier(all_paras)
+        return [c.to_dict() for c in chunks_objs], all_paras
+    
+    # Fallback nếu không import được chunking
+    return [{"id": p.id, "file": p.file, "section": p.section, "text": p.text, "source_ids": [p.id]} for p in all_paras], all_paras
 
 
 def referenced_ids():
@@ -57,15 +92,17 @@ def referenced_ids():
     return sorted(set(re.findall(r"T0[46]-\d{3}", src)))
 
 
-def write_sources(chunks):
+def write_sources(all_paras):
     wanted = set(referenced_ids())
     out = {}
-    for c in chunks:
-        if c["id"] in wanted:
-            text = c["text"]
-            if len(text) > MAX_CHARS:
-                text = text[:MAX_CHARS].rsplit(" ", 1)[0] + " …"
-            out[c["id"]] = {"section": c["section"], "text": text}
+    for p in all_paras:
+        pid = getattr(p, "id", None) or p.get("id")
+        if pid in wanted:
+            ptext = getattr(p, "text", None) or p.get("text")
+            psec = getattr(p, "section", None) or p.get("section", "")
+            if len(ptext) > MAX_CHARS:
+                ptext = ptext[:MAX_CHARS].rsplit(" ", 1)[0] + " …"
+            out[pid] = {"section": psec, "text": ptext}
     missing = wanted - set(out)
     path = CODEBASE / "mock" / "data" / "sources.local.js"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -125,8 +162,8 @@ def main():
     args = ap.parse_args()
     pack = find_pack(args.pack)
     print(f"Data pack: {pack}")
-    chunks = read_paragraphs(pack)
-    write_sources(chunks)
+    chunks, all_paras = read_chunks_with_overlap(pack)
+    write_sources(all_paras)
     write_chunks(chunks)
     write_golden(pack)
 

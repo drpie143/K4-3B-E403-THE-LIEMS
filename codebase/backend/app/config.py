@@ -17,7 +17,7 @@ DEFAULT_MODELS = {
 
 
 def _load_dotenv(path: Path) -> None:
-    """Đọc .env đơn giản (KEY=VALUE), không ghi đè biến đã có."""
+    """Đọc .env đơn giản (KEY=VALUE), ưu tiên giá trị được khai báo trong .env."""
     if not path.exists():
         return
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -25,7 +25,9 @@ def _load_dotenv(path: Path) -> None:
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+        val = value.strip().strip('"').strip("'")
+        if val:
+            os.environ[key.strip()] = val
 
 
 def _flag(name: str, default: bool) -> bool:
@@ -56,10 +58,18 @@ class Settings:
     reask_seconds: int = 180
     max_thumbs_down: int = 2
     max_wrong_checks: int = 2
+    retrieval_mode: str = "hybrid"  # "hybrid" | "bm25" | "dense"
+    hybrid_alpha: float = 0.5       # Trọng số kết hợp BM25 và Dense (0.0: thuần dense, 1.0: thuần bm25)
+    rrf_k: int = 60                 # Hằng số Reciprocal Rank Fusion
+    embedding_provider: str = ""    # "openai" | "gemini" (nếu để trống, theo llm_provider)
+    embedding_model: str = ""       # "text-embedding-3-small" hoặc "text-embedding-004"
+    supabase_url: str = ""
+    supabase_key: str = ""
     cards_dir: Path = field(default_factory=lambda: BACKEND_DIR / "cards")
     personas_path: Path = field(default_factory=lambda: BACKEND_DIR / "personas.yaml")
     prompts_dir: Path = field(default_factory=lambda: BACKEND_DIR / "app" / "prompts")
     chunks_path: Path = field(default_factory=lambda: CODEBASE_DIR / "data" / "chunks.local.json")
+    transcripts_dir: Path = field(default_factory=lambda: BACKEND_DIR / "Data" / "transcript")
     db_path: Path = field(default_factory=lambda: BACKEND_DIR / "p3.db")
     trace_dir: Path = field(default_factory=lambda: BACKEND_DIR / "traces")
     cache_dir: Path = field(default_factory=lambda: BACKEND_DIR / ".cache")
@@ -92,8 +102,15 @@ def load_settings(env_file: Path | None = None) -> Settings:
         retrieval_min_score=float(env.get("RETRIEVAL_MIN_SCORE", "1.0")),
         stale_days=int(env.get("STALE_DAYS", "14")),
         strategy_ttl_days=int(env.get("STRATEGY_TTL_DAYS", "30")),
+        retrieval_mode=env.get("RETRIEVAL_MODE", "hybrid").strip().lower(),
+        hybrid_alpha=float(env.get("HYBRID_ALPHA", "0.5")),
+        rrf_k=int(env.get("RRF_K", "60")),
+        embedding_provider=env.get("EMBEDDING_PROVIDER", "").strip().lower(),
+        embedding_model=env.get("EMBEDDING_MODEL", "").strip(),
+        supabase_url=env.get("SUPABASE_URL", "").strip(),
+        supabase_key=env.get("SUPABASE_KEY", "").strip(),
     )
-    for key, attr in [("CHUNKS_PATH", "chunks_path"), ("DB_PATH", "db_path"), ("TRACE_DIR", "trace_dir"), ("CACHE_DIR", "cache_dir")]:
+    for key, attr in [("CHUNKS_PATH", "chunks_path"), ("DB_PATH", "db_path"), ("TRACE_DIR", "trace_dir"), ("CACHE_DIR", "cache_dir"), ("TRANSCRIPTS_DIR", "transcripts_dir")]:
         if env.get(key):
             setattr(s, attr, Path(env[key]))
     return s

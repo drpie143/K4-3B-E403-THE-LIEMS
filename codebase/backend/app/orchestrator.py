@@ -58,7 +58,7 @@ class Orchestrator:
     def __init__(self, settings: Settings, llm: LLMClient | None = None, db_path=None):
         self.s = settings
         self.cards = CardStore(settings.cards_dir)
-        self.retriever = Retriever(self.cards, settings.chunks_path)
+        self.retriever = Retriever(self.cards, settings.chunks_path, settings=settings)
         self.detector = SignalDetector(self.cards, settings.reask_seconds)
         self.store = ProfileStore(settings, self.cards, db_path)
         self.prompts = Prompts(settings.prompts_dir)
