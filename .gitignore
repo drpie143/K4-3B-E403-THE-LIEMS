@@ -1,4 +1,32 @@
+# Operating System
 .DS_Store
+Thumbs.db
+
+# Python & virtual environment
 __pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.pytest_temp/
+.venv/
+venv/
+
+# Credentials & environment variables (STRICTLY FORBIDDEN)
 .env
+*/.env
+*.env
+
+# Local data & databases (STRICTLY FORBIDDEN BY BTC)
+*.local.*
+*.db
+*.sqlite
+*.sqlite3
+*.jsonl
+codebase/data/
+codebase/backend/p3.db
+codebase/backend/traces/
+codebase/backend/.cache/
 node_modules/
+
+# Do not commit raw survey or raw data packs
+survey_responses.csv

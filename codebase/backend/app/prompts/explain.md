@@ -1,0 +1,53 @@
+<task>
+Viết lời giải thích lại cho học viên theo <decision>. Trả về Answer gồm các block.
+</task>
+
+<decision>
+{{decision}}
+</decision>
+
+<concept_card>
+{{card}}
+</concept_card>
+
+<prerequisite_primer>
+{{primer}}
+</prerequisite_primer>
+
+<passages>
+{{passages}}
+</passages>
+
+<reference_answer>
+Đây là mẫu đã được duyệt cho đúng mức và kiểu này. Giữ cấu trúc và độ chính xác,
+điều chỉnh để trả lời đúng câu học viên hỏi; không cần chép nguyên văn.
+{{reference}}
+</reference_answer>
+
+<previous_answer_summary>{{previous}}</previous_answer_summary>
+<memory_hint>dùng: {{worked}} · tránh: {{failed}}</memory_hint>
+<learner_note>{{note}}</learner_note>
+<selection>{{selection}}</selection>
+<student_message>{{text}}</student_message>
+
+<ask_type>{{ask_type}}</ask_type>
+
+<format>
+- **Trả lời đúng khía cạnh học viên hỏi (ask_type) ngay ở block đầu**: khai_niem = nó là gì · co_che = nó chạy thế nào ·
+  ung_dung = dùng để làm gì (chỉ nêu ứng dụng có trong passages/thẻ) · so_sanh = khác ở chỗ nào · vi_du = một ví dụ cụ thể.
+  Không trả lời sang khía cạnh khác rồi mới nói tới điều được hỏi.
+- Cấu trúc 4 phần (analogy → map → key → limit) chỉ bắt buộc khi ask_type là khai_niem hoặc co_che;
+  với khía cạnh khác, giữ ít nhất một block "key" chốt bằng thuật ngữ gốc.
+- Nếu bài giảng không nói về khía cạnh được hỏi, nói thẳng điều đó trong block "outside" thay vì suy diễn.
+- Nếu decision.prereq_first khác null: block đầu có t = "prereq", title = "Trước hết: <tên khái niệm>", giải thích khái niệm đó 1–2 câu theo <prerequisite_primer>.
+- Mức L1/L2 phải có đủ các block: "analogy" → "map" (rows là các cặp [ví dụ, thuật ngữ]) → "key" → "limit".
+- Block "key" phải nêu các ý chính dựa trên <passages> và core_claims (nếu có); dùng thuật ngữ chuẩn trong required_terms; ghi claims = ["C1", ...] nếu có trong core_claims, nếu không có để claims = [].
+- Mỗi block (trừ "outside", "formula") phải có src là các mã đoạn id trong <passages> hoặc decision.source_ids (ví dụ ["T01-045"], ["T04-053"], ["T06-130"]). Trích dẫn chính xác mã đoạn là điều kiện tiên quyết để câu trả lời có căn cứ.
+- Nội dung ngoài bài giảng (công thức chuẩn, chi tiết phép tính không có trong passages) đặt trong block "outside", src = [].
+- Nếu dùng ví dụ, ưu tiên ví dụ trực quan dễ hiểu bám sát bài học, hoặc id trong approved_analogies (nếu có). Ghi id vào analogy_id (nếu ví dụ tự viết thì analogy_id = null).
+- Không lặp lại cách giải thích trong previous_answer_summary.
+- Độ dài (không tính bảng, block prereq và block outside): L1 ≤ 120 từ · L2 ≤ 180 · L3 ≤ 180 · L4 ≤ 220 · L5 ≤ 320. Mức L1 dùng câu ngắn.
+- html chỉ dùng <b>, <i>, <sub>. Không dùng tiêu đề markdown.
+- summary_for_next_turn: 1 câu mô tả cách vừa giải thích (kiểu, ví dụ đã dùng).
+{{fix_instructions}}
+</format>

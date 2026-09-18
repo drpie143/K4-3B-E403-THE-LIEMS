@@ -1,0 +1,112 @@
+# Sổ đăng ký nguồn và buổi học.
+# Chỉ chứa TÓM TẮT do nhóm tự viết + mã đoạn. Nguyên văn transcript nằm ở
+# codebase/data/chunks.local.json (sinh bởi scripts/build_local_data.py, không commit).
+
+lessons:
+  day01-self-attention:
+    title: "Day 6 · Transformer & Attention"
+    transcript_files: [transcript-01-clean.md, transcript-02-clean.md, transcript-03-clean.md, transcript-04-clean.md, transcript-05-clean.md, transcript-06-clean.md]
+    concepts: [self_attention, multi_head, token, vector, similarity]
+  day02-business-problem:
+    title: "Day 2 Sáng · Xác định bài toán kinh doanh cho AI"
+    transcript_files: [transcript-01-clean.md, transcript-02-clean.md, transcript-03-clean.md, transcript-04-clean.md, transcript-05-clean.md, transcript-06-clean.md]
+    concepts: []
+  day02-success-metrics:
+    title: "Day 2 · Chỉ số thành công & Mức tự động hoá"
+    transcript_files: [transcript-01-clean.md, transcript-02-clean.md, transcript-03-clean.md, transcript-04-clean.md, transcript-05-clean.md, transcript-06-clean.md]
+    concepts: []
+  day02-case-studies:
+    title: "Day 2 Chiều · Soi bài toán các nhóm & Ràng buộc"
+    transcript_files: [transcript-01-clean.md, transcript-02-clean.md, transcript-03-clean.md, transcript-04-clean.md, transcript-05-clean.md, transcript-06-clean.md]
+    concepts: []
+  day01-llm-foundation:
+    title: "Day 1 · LLM Foundation: Cách LLM hoạt động"
+    transcript_files: [transcript-01-clean.md, transcript-02-clean.md, transcript-03-clean.md, transcript-04-clean.md, transcript-05-clean.md, transcript-06-clean.md]
+    concepts: []
+  day05-eval-data:
+    title: "Day 5 · Bài toán AI, Đánh giá & Dữ liệu"
+    transcript_files: [transcript-01-clean.md, transcript-02-clean.md, transcript-03-clean.md, transcript-04-clean.md, transcript-05-clean.md, transcript-06-clean.md]
+    concepts: []
+  day06-transformer-attention:
+    title: "Day 6 · Transformer & Cơ chế Attention"
+    transcript_files: [transcript-01-clean.md, transcript-02-clean.md, transcript-03-clean.md, transcript-04-clean.md, transcript-05-clean.md, transcript-06-clean.md]
+    concepts: [self_attention, multi_head, token, vector, similarity]
+
+sources:
+  T04-053:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Attention: mô hình phải chú ý đúng chỗ; đưa quá nhiều ngữ cảnh có thể làm nó chú ý sai."
+  T04-054:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Attention tạo ma trận trọng số cho từng cặp từ để thấy từ nào liên quan nhau; hình minh hoạ chỉ là ví dụ."
+  T04-055:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Mô hình cũ chỉ nhìn các từ cạnh nhau; Transformer có cửa sổ rộng để nối các từ ở xa."
+  T04-056:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Multi-head: nhiều con mắt cùng nhìn, mỗi con mắt một đặc trưng, rồi tổng hợp — ví dụ thầy bói xem voi."
+  T04-057:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Bài học rút ra: quản lý sự chú ý và ngữ cảnh đưa cho mô hình thì làm việc với AI hiệu quả và tiết kiệm hơn."
+  T04-073:
+    section: "Từ mô hình đến AI agent"
+    summary: "Từ mô hình đến AI agent: cho mô hình công cụ và ngữ cảnh để làm việc (mức tổng quan)."
+  T06-126:
+    section: "Transformer — trái tim của LLM"
+    summary: "Luồng Transformer: token → embedding → self-attention (nhìn song song) → feed forward → dự đoán token kế tiếp."
+  T06-127:
+    section: "Transformer — trái tim của LLM"
+    summary: "Văn bản được tách thành token, mỗi token thành vector để tính toán; Transformer xử lý song song, khác RNN/LSTM."
+  T06-128:
+    section: "Transformer — trái tim của LLM"
+    summary: "Vector giống toạ độ GPS định danh token; các token nhìn nhau để tìm similarity score."
+  T06-129:
+    section: "Self-attention: ví dụ con mèo ngồi trên bàn và công thức Q–K–V"
+    summary: "Ví dụ “Con mèo ngồi lên bàn, nó rất đáng yêu”: làm sao biết “nó” là con mèo hay cái bàn?"
+  T06-130:
+    section: "Self-attention: ví dụ con mèo ngồi trên bàn và công thức Q–K–V"
+    summary: "Self-attention: mỗi token nhìn các token khác và đánh giá mức tương đồng; công thức Q (query), K (key), V (value) với softmax."
+  T06-131:
+    section: "Self-attention: ví dụ con mèo ngồi trên bàn và công thức Q–K–V"
+    summary: "Ví dụ thư viện: nhãn bên ngoài cuốn sách là Key, nội dung bên trong là Value, cuốn sách đang tìm là Query."
+  T06-132:
+    section: "Self-attention: ví dụ con mèo ngồi trên bàn và công thức Q–K–V"
+    summary: "Query được so với Key, lấy Value; “nó” và “mèo” có similarity score cao nhất nên “nó” gắn với con mèo."
+  T06-134:
+    section: "Token và cơ chế dự đoán next token"
+    summary: "Token là đơn vị cơ bản của LLM; tiếng Việt thường tốn nhiều token hơn tiếng Anh."
+  T06-135:
+    section: "Token và cơ chế dự đoán next token"
+    summary: "LLM không đọc từng ký tự hay từng từ mà đọc token; cơ chế tự chú ý tính similarity score để đoán từ kế tiếp."
+  T06-136:
+    section: "Token và cơ chế dự đoán next token"
+    summary: "LLM không hiểu ngôn ngữ như con người, nó dự đoán token có xác suất cao nhất; temperature điều chỉnh độ sáng tạo."
+  T06-160:
+    section: "Lab demo: trực quan hóa self-attention"
+    summary: "Lab demo: chạy notebook bertviz + PhoBERT để trực quan hoá self-attention."
+
+# Thuật ngữ biết chắc KHÔNG có trong buổi này → trả "no_source" ngay (đường nhanh).
+# Giá trị: các đoạn gần nhất trong buổi để gợi ý học viên (có thể rỗng).
+# Danh sách này LỚN DẦN: mỗi khi thấy học viên hỏi một thuật ngữ chưa có thẻ, thêm vào đây
+# (kèm đoạn gần nhất trong buổi, nếu có) để trợ giảng từ chối thay vì giải thích nhầm sang khái niệm khác.
+outside_terms:
+  react: [T04-073]
+  bert: []
+  decoder-only: [T06-075]
+  decoder only: [T06-075]
+  encoder-only: [T06-075]
+  encoder-decoder: [T06-075]
+  tiktoken: []
+  phobert: [T06-160]
+  multi-query: []
+  positional encoding: []
+  agent loop: [T04-073]
+  tool call: [T04-073]
+  function call: [T04-073]
+  rag: []
+  lora: []
+  fine-tune: []
+  finetune: []
+  fine tuning: []
+  diffusion: []
+  cnn: []

@@ -1,0 +1,27 @@
+id: token
+term: Token
+vi_name: đơn vị LLM đọc
+lesson_id: day01-self-attention
+reviewed: true
+reviewed_by: "[tên TA/nhóm]"
+aliases: [token, tokens]
+prerequisites: []
+required_terms: [token]
+core_claims:
+  - id: C1
+    text: Token là đơn vị cơ bản LLM đọc — không phải ký tự, cũng không hẳn là từ.
+    src: [T06-134, T06-135]
+approved_analogies: []
+analogy_limits: []
+misconceptions: []
+outside_lesson_notes: []
+primer:
+  html: "<b>Token</b> là đơn vị mà LLM đọc — không phải từng ký tự, cũng không hẳn là từng từ. Ví dụ “Hello World” là 2 token."
+  src: [T06-134, T06-135]
+checks: []
+templates:
+  first:
+    - t: p
+      html: "<b>Token</b> là đơn vị mà LLM đọc — không phải từng ký tự, cũng không hẳn là từng từ. Ví dụ “Hello World” là 2 token."
+      src: [T06-134, T06-135]
+      claims: [C1]

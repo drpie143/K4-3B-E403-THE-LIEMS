@@ -1,0 +1,323 @@
+# Thẻ khái niệm chuẩn — nhóm tự diễn đạt từ slide Day 1 và transcript-04/06.
+# Chỉ thẻ reviewed: true được dùng lúc chạy (mức Augment).
+id: self_attention
+term: Self-attention
+vi_name: cơ chế tự chú ý
+lesson_id: day01-self-attention
+reviewed: true
+reviewed_by: "[tên TA/nhóm]"
+aliases: [attention, self attention, tự chú ý, query, key, value, "q, k, v", qkv, trọng số]
+prerequisites: [token, vector, similarity]
+required_terms: [Query, Key, Value, token, trọng số]
+
+core_claims:
+  - id: C1
+    text: Mỗi token nhìn các token khác trong câu cùng lúc (song song) và tính điểm liên quan / trọng số.
+    src: [T06-126, T06-130]
+  - id: C2
+    text: "Dùng Query – Key – Value: Query của token so với Key của token khác → trọng số → lấy Value theo trọng số."
+    src: [T06-130, T06-131, T06-132]
+  - id: C3
+    text: "Nhờ vậy mô hình gắn đúng ngữ cảnh: “nó” → “con mèo”, không phải “cái bàn”."
+    src: [T06-129, T06-132]
+
+approved_analogies:
+  - id: thu_vien
+    title: Thư viện
+    text: "Tìm sách: dò nhãn trên gáy từng cuốn (Key), cuốn khớp nhất thì đọc nội dung bên trong (Value); cuốn đang tìm là Query."
+    src: [T06-131]
+  - id: con_meo
+    title: "“Nó” là ai?"
+    text: "Câu “Con mèo ngồi lên bàn, nó rất đáng yêu”: nhìn lại cả câu để biết “nó” là con mèo."
+    src: [T06-129, T06-132]
+
+analogy_limits:
+  - "Ở thư viện thường chỉ mượn 1 cuốn; self-attention lấy thông tin từ tất cả token cùng lúc, token khớp hơn góp nhiều hơn."
+  - "Q, K, V là các vector số do mô hình học ra, không phải chữ; mô hình không “hiểu” câu như người."
+
+misconceptions:
+  - id: M1
+    pattern: chi nhin mot tu quan trong nhat
+    text: Self-attention chỉ nhìn một từ quan trọng nhất
+    fix: "Self-attention lấy thông tin từ <b>mọi token</b>, token nào liên quan hơn thì có <b>trọng số</b> lớn hơn."
+    src: [T04-054]
+  - id: M2
+    pattern: doc lan luot tung tu
+    text: Mô hình đọc lần lượt từng từ như người đọc
+    fix: "Transformer cho các token <b>nhìn nhau song song</b>, khác cách xử lý tuần tự của RNN/LSTM."
+    src: [T06-127]
+  - id: M3
+    pattern: hieu nghia nhu con nguoi
+    text: Mô hình hiểu nghĩa câu như con người
+    fix: "LLM <b>không hiểu ngôn ngữ như con người</b>; nó tính điểm liên quan và dự đoán token có xác suất cao nhất."
+    src: [T06-136]
+  - id: M4
+    pattern: key la noi dung
+    text: Key là nội dung cuốn sách
+    fix: "<b>Key</b> là nhãn để so khớp; <b>Value</b> mới là nội dung được lấy ra."
+    src: [T06-131]
+
+outside_lesson_notes:
+  - "Hệ số √dₖ và phép nhân ma trận Q·Kᵀ."
+  - "Softmax làm trọng số dương và cộng lại bằng 1; bước lấy Value là tổng có trọng số."
+
+primer:
+  html: "<b>Self-attention</b>: mỗi token nhìn các token khác để biết nên lấy thông tin từ đâu."
+  src: [T06-130]
+
+checks:
+  - id: SA-Q1
+    question: "Trong câu “Con mèo ngồi lên bàn, nó rất đáng yêu”, self-attention giúp mô hình làm gì?"
+    options:
+      - { k: A, text: "Đọc lần lượt từng từ từ trái sang phải", misconception: M2 }
+      - { k: B, text: "Gắn “nó” với “con mèo” vì điểm liên quan giữa hai token cao nhất", correct: true }
+      - { k: C, text: "Giữ lại duy nhất một từ quan trọng, bỏ các từ khác", misconception: M1 }
+      - { k: D, text: "Hiểu nghĩa câu giống hệt con người", misconception: M3 }
+    src: [T06-129, T06-132]
+  - id: SA-Q2
+    question: "Trong ví dụ thư viện, “nhãn trên gáy sách” ứng với phần nào?"
+    options:
+      - { k: A, text: Query }
+      - { k: B, text: Key, correct: true }
+      - { k: C, text: Value, misconception: M4 }
+      - { k: D, text: Token }
+    src: [T06-131]
+
+# ----------------------------------------------------------------------------
+# Mẫu trả lời đã duyệt theo thang 5 mức. Dùng làm:
+#   (1) đáp án dự phòng khi LLM lỗi / validator rớt 2 lần,
+#   (2) "reference_answer" trong prompt EXPLAIN,
+#   (3) câu trả lời của FakeLLM khi test.
+# Khoá: L{n}_vi_du_{analogy} | L{n}_ngan_gon | L3_first | L3 | L4 | L5
+# ----------------------------------------------------------------------------
+blocks:
+  lib_map: &lib_map
+    t: map
+    title: Nối ví dụ với thuật ngữ
+    rows:
+      - ["Cuốn sách bạn muốn tìm", "<b>Query</b> (Q) — token đang hỏi"]
+      - ["Nhãn trên gáy sách", "<b>Key</b> (K) — nhãn để so khớp"]
+      - ["Nội dung bên trong sách", "<b>Value</b> (V) — thông tin được lấy ra"]
+      - ["Mức khớp giữa yêu cầu và nhãn", "<b>trọng số</b> attention (similarity score)"]
+    src: [T06-131]
+    claims: [C2]
+  cat_map: &cat_map
+    t: map
+    title: Nối ví dụ với thuật ngữ
+    rows:
+      - ["Từ “nó” đang cần biết mình chỉ ai", "<b>Query</b> của token “nó”"]
+      - ["Đặc điểm của từng từ để so (“mèo”, “bàn”…)", "<b>Key</b> của các token khác"]
+      - ["Thông tin lấy về từ “mèo”", "<b>Value</b> của token “mèo”"]
+      - ["“nó” hợp với “mèo” hơn “bàn”", "<b>trọng số</b> cao hơn (similarity score)"]
+    src: [T06-130, T06-132]
+    claims: [C2]
+  cat_map_simple: &cat_map_simple
+    t: map
+    title: Nối ví dụ với thuật ngữ
+    rows:
+      - ["“nó” tự hỏi: mình chỉ ai?", "<b>Query</b>"]
+      - ["“mèo”, “bàn” đưa ra đặc điểm để so", "<b>Key</b>"]
+      - ["thông tin lấy về từ “mèo”", "<b>Value</b>"]
+    src: [T06-130, T06-132]
+    claims: [C2]
+  glossary: &glossary
+    t: map
+    title: 3 từ cần nhớ
+    rows:
+      - ["<b>token</b>", "mảnh chữ mà máy đọc (gần giống một từ)"]
+      - ["<b>vector</b>", "dãy số đại diện cho một token, giống toạ độ GPS"]
+      - ["<b>trọng số</b>", "điểm cho biết hai token liên quan nhiều hay ít"]
+    src: [T06-128, T06-134]
+    claims: []
+  key: &key
+    t: key
+    html: "<b>Self-attention</b>: mỗi <b>token</b> dùng <b>Query</b> của mình so với <b>Key</b> của các token khác (cùng lúc) để ra <b>trọng số</b>, rồi lấy <b>Value</b> theo trọng số đó — nhờ vậy “nó” được gắn với “con mèo”."
+    src: [T06-130, T06-132]
+    claims: [C1, C2, C3]
+  key_simple: &key_simple
+    t: key
+    html: "<b>Self-attention</b>: mỗi <b>token</b> nhìn tất cả token khác cùng lúc. Nó dùng <b>Query</b> so với <b>Key</b> để ra <b>trọng số</b>, rồi lấy <b>Value</b> nhiều hơn từ token có trọng số cao — nên “nó” được hiểu là “con mèo”."
+    src: [T06-130, T06-132]
+    claims: [C1, C2, C3]
+  limit: &limit
+    t: limit
+    html: "Ở thư viện bạn thường chỉ mượn 1 cuốn. Self-attention thì lấy thông tin từ <b>tất cả token</b> cùng lúc, token nào khớp hơn thì góp nhiều hơn. Và Q, K, V thực chất là <b>các vector số do mô hình học ra</b>, không phải chữ."
+    src: [T04-054, T06-130]
+    claims: []
+  limit_simple: &limit_simple
+    t: limit
+    html: "Người đọc thì liếc lại câu; máy thì so <b>tất cả token cùng lúc</b> bằng các con số, và nó không “hiểu” câu như người."
+    src: [T06-127, T06-136]
+    claims: []
+  lib_analogy: &lib_analogy
+    t: analogy
+    title: "Ví dụ đời thường · Thư viện"
+    html: "Bạn vào thư viện tìm sách về <i>“Kiến trúc cổ ở Hà Nội”</i>. Bạn dò <b>nhãn trên gáy</b> từng cuốn (“Lịch sử Hà Nội”, “Kiến trúc Đông Dương”, “Nấu ăn kiểu Ý”…), thấy cuốn nào khớp nhất thì đọc <b>nội dung bên trong</b>."
+    src: [T06-131]
+    claims: []
+  cat_analogy: &cat_analogy
+    t: analogy
+    title: "Ví dụ đời thường · “Nó” là ai?"
+    html: "Đọc câu <i>“Con mèo ngồi lên bàn, nó rất đáng yêu”</i>. Muốn biết “nó” là mèo hay bàn, bạn <b>liếc lại cả câu</b> và thấy “đáng yêu” hợp với con mèo hơn. Self-attention làm việc “liếc lại” đó cho <b>mọi token cùng một lúc</b>."
+    src: [T06-129, T06-132]
+    claims: [C3]
+
+templates:
+  L1_vi_du_con_meo:
+    - t: analogy
+      title: "Ví dụ đời thường · “Nó” là ai?"
+      html: "Đọc câu <i>“Con mèo ngồi lên bàn, nó rất đáng yêu”</i>. Để biết “nó” là mèo hay bàn, bạn nhìn lại cả câu. Máy cũng làm như vậy — cho mọi từ cùng một lúc."
+      src: [T06-129]
+      claims: []
+    - *glossary
+    - *cat_map_simple
+    - *key_simple
+    - *limit_simple
+  L1_vi_du_thu_vien:
+    - t: analogy
+      title: "Ví dụ đời thường · Thư viện"
+      html: "Bạn tìm một cuốn sách: bạn đọc <b>nhãn</b> ngoài bìa để so, cuốn nào khớp thì đọc <b>nội dung</b> bên trong."
+      src: [T06-131]
+      claims: []
+    - *glossary
+    - *lib_map
+    - *key_simple
+    - *limit
+  L1_ngan_gon:
+    - t: steps
+      title: 3 bước
+      items:
+        - "Máy đổi mỗi <b>token</b> thành một dãy số (<b>vector</b>)."
+        - "Mỗi token so mình với tất cả token khác cùng lúc (<b>Query</b> gặp <b>Key</b>) → ra <b>trọng số</b>."
+        - "Token lấy thông tin (<b>Value</b>) nhiều hơn từ token có trọng số cao."
+      src: [T06-127, T06-130]
+      claims: [C1, C2]
+    - *glossary
+    - *key_simple
+    - *limit_simple
+  L2_vi_du_thu_vien: [*lib_analogy, *lib_map, *key, *limit]
+  L2_vi_du_con_meo: [*cat_analogy, *cat_map, *key, *limit]
+  L2_ngan_gon:
+    - t: steps
+      title: 4 bước
+      items:
+        - "Mỗi <b>token</b> được đổi thành <b>vector</b> để tính được."
+        - "Token đang xét dùng <b>Query</b> so với <b>Key</b> của các token khác → ra <b>trọng số</b> (điểm liên quan)."
+        - "Lấy <b>Value</b> của các token theo trọng số → token hiểu thêm ngữ cảnh."
+        - "Các token làm việc này <b>cùng lúc</b>, nên “nó” được gắn với “con mèo”."
+      src: [T06-127, T06-130, T06-132]
+      claims: [C1, C2, C3]
+    - *lib_map
+    - *key
+    - *limit
+  L3_first:
+    - t: p
+      html: "<b>Self-attention</b> (cơ chế tự chú ý) cho mỗi <b>token</b> nhìn tất cả token khác trong câu <b>cùng lúc</b> để tính <b>trọng số</b> — token nào liên quan nhiều thì được chú ý nhiều."
+      src: [T06-126, T06-130]
+      claims: [C1]
+    - t: p
+      html: "Cách tính dùng bộ ba <b>Query – Key – Value</b>: Query của token so với Key của các token khác ra trọng số, rồi lấy Value theo trọng số đó."
+      src: [T06-130, T06-132]
+      claims: [C2]
+    - t: p
+      html: "Ví dụ “Con mèo ngồi lên bàn, nó rất đáng yêu”: điểm liên quan giữa “nó” và “mèo” cao nhất, nên mô hình gắn “nó” với con mèo."
+      src: [T06-129, T06-132]
+      claims: [C3]
+  L3:
+    - t: p
+      html: "Mỗi <b>token</b> đã là <b>vector</b>. Self-attention cho token đó nhìn <b>tất cả token khác song song</b> và tính <b>trọng số</b> cho từng cặp."
+      src: [T06-126, T06-130]
+      claims: [C1]
+    - *lib_map
+    - *key
+    - t: limit
+      html: "Q, K, V không phải chữ mà là các vector do mô hình học ra; mô hình cũng không “hiểu” câu, nó tính điểm liên quan rồi dự đoán."
+      src: [T06-130, T06-136]
+      claims: []
+  L4:
+    - t: p
+      html: "Mỗi <b>token</b> (đã là vector) có ba vector <b>Query</b>, <b>Key</b>, <b>Value</b>. Với token đang xét, mô hình so Query của nó với Key của <b>mọi token</b>, song song, để ra điểm liên quan."
+      src: [T06-126, T06-130]
+      claims: [C1]
+    - t: steps
+      title: Các bước tính
+      items:
+        - "So <b>Query</b> với <b>Key</b> → điểm liên quan cho từng cặp token."
+        - "Qua <b>softmax</b> → điểm thành <b>trọng số</b>."
+        - "Lấy <b>Value</b> của các token theo trọng số → biểu diễn mới của token."
+        - "Mọi token làm cùng lúc."
+      src: [T06-130, T06-132]
+      claims: [C2]
+    - t: p
+      html: "“nó” có trọng số cao nhất với “mèo”, nên biểu diễn mới của “nó” mang nhiều thông tin của “mèo”."
+      src: [T06-132]
+      claims: [C3]
+    - t: outside
+      html: "Softmax làm các trọng số dương và cộng lại bằng 1; bước lấy Value là một <b>tổng có trọng số</b>. Bài giảng Day 1 chỉ nêu Q, K, V và softmax, không đi vào chi tiết này."
+      src: []
+      claims: []
+  L5:
+    - t: p
+      html: "Mỗi <b>token</b> sinh ra ba vector <b>Query</b>, <b>Key</b>, <b>Value</b>. Điểm liên quan giữa hai token là mức khớp giữa Query của token này và Key của token kia; qua <b>softmax</b> thành <b>trọng số</b>. Tất cả token làm việc này song song."
+      src: [T06-126, T06-130]
+      claims: [C1, C2]
+    - t: formula
+      html: "Attention(Q, K, V) = softmax(Q·Kᵀ / √d<sub>k</sub>) · V"
+      src: [T06-130]
+      claims: []
+    - t: outside
+      html: "Hệ số <b>√d<sub>k</sub></b> và việc nhân ma trận Q·Kᵀ là dạng chuẩn trong kiến trúc Transformer; bài giảng Day 1 chỉ nêu Q, K, V và softmax."
+      src: []
+      claims: []
+    - t: p
+      html: "Kết quả: token “nó” có trọng số cao với “mèo”, nên biểu diễn của “nó” mang thông tin của “mèo”. <b>Multi-head</b> lặp cơ chế này với nhiều “con mắt” để bắt nhiều đặc trưng."
+      src: [T06-132, T04-056]
+      claims: [C3]
+    - t: p
+      html: "Vì mọi token được xử lý <b>song song</b>, Transformer không phải “nhớ dần” như RNN/LSTM — điểm mạnh giảng viên nhấn mạnh."
+      src: [T06-127]
+      claims: []
+    - t: p
+      html: "Hệ quả thực tế: attention có thể <b>chú ý sai chỗ</b> khi ngữ cảnh quá dài và nhiễu, nên cần chọn lọc ngữ cảnh đưa vào mô hình."
+      src: [T04-053]
+      claims: []
+    - t: p
+      html: "Muốn thấy trọng số thật: Lab demo dùng bertviz + PhoBERT để xem token nào nhìn token nào."
+      src: [T06-160]
+      claims: []
+
+# Trả lời riêng theo KHÍA CẠNH học viên hỏi (ask_type). Chỉ nói điều có trong bài giảng.
+aspects:
+  ung_dung:
+    - t: p
+      html: "Buổi Day 1 nói về ứng dụng của <b>self-attention</b> ở hai chỗ: nó cho mô hình nối các từ liên quan <b>dù nằm xa nhau</b> trong câu — điều mà mô hình cũ chỉ nhìn từ bên cạnh không làm được; và vì mô hình chỉ chú ý được có hạn, <b>ngữ cảnh bạn đưa vào</b> quyết định chất lượng kết quả."
+      src: [T04-055, T04-053]
+      claims: []
+    - t: steps
+      title: Ứng dụng theo bài giảng
+      items:
+        - "Hiểu đúng ngữ cảnh trong câu: “nó” được gắn với “con mèo” chứ không phải “cái bàn”."
+        - "Xử lý cả câu <b>song song</b> thay vì đọc dần, nên câu dài không bị quên đoạn đầu."
+        - "Khi làm việc với AI: chọn lọc ngữ cảnh đưa vào thay vì đổ hết — mô hình chú ý đúng chỗ hơn."
+      src: [T06-132, T06-127, T04-057]
+      claims: [C1, C3]
+    - t: key
+      html: "Cơ chế nền vẫn vậy: mỗi <b>token</b> dùng <b>Query</b> so với <b>Key</b> của các token khác cùng lúc để ra <b>trọng số</b>, rồi lấy <b>Value</b> theo trọng số đó."
+      src: [T06-130, T06-132]
+      claims: [C1, C2, C3]
+    - t: outside
+      html: "Các ứng dụng hay được nhắc ngoài bài (dịch máy, tóm tắt, chatbot) không có trong buổi Day 1 nên mình không khẳng định thêm."
+      src: []
+      claims: []
+    - t: p
+      html: "Muốn thấy tận mắt: Lab demo dùng bertviz để xem token nào đang chú ý token nào."
+      src: [T06-160]
+      claims: []
+
+# Đoạn thêm khi học viên hỏi "cộng trọng số vào đâu" (case T10728), chỉ ở L1–L3.
+extras:
+  weighted_sum:
+    t: outside
+    html: "“Cộng trọng số” nghĩa là: lấy <b>Value</b> của mỗi token nhân với <b>trọng số</b> của nó rồi <b>cộng lại</b>, được một vector mới cho token đang xét. Bài giảng Day 1 chỉ nói tới bước “tính trọng số rồi lấy Value”, <b>không giảng chi tiết phép cộng này</b> — muốn đi sâu, hỏi TA hoặc xem Lab demo self-attention."
+    src: [T06-160]
+    claims: []
