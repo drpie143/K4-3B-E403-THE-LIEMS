@@ -180,7 +180,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
   Kế hoạch chi tiết 9 bước đến CP5: tài liệu backend §12.
 - **Willing users:** `Lê Thanh Tình`, `Phạm Hương Giang`, `Phạm Thành Thái` (ngoài nhóm).
   - Vòng validation: phiên 10 phút/người theo guide §4.2.
-  - Nhiệm vụ: "hiểu self-attention đủ để trả lời câu kiểm tra".
+  - Nhiệm vụ: "hiểu khái niệm context window và hiện tượng context rot đủ để trả lời câu kiểm tra".
   - Đo: số lần bấm "chưa hiểu" trước khi trả lời đúng + ghi nguyên văn.
   - Log: `validation/log.md` và `survey_responses.csv`; changelog: `validation/changelog.md`.
 - **Multi-prototype:**
