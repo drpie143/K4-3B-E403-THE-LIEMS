@@ -56,7 +56,13 @@ Chép lại độ dài của mẫu là chưa đạt.
 - Nếu bài giảng không nói về khía cạnh được hỏi, nói thẳng điều đó trong block "outside" thay vì suy diễn.
 - Nếu decision.prereq_first khác null: block đầu có t = "prereq", title = "Trước hết: <tên khái niệm>", giải thích khái niệm đó 1–2 câu theo <prerequisite_primer>.
 - Mức L1/L2 phải có đủ các block: "analogy" → "map" (rows là các cặp [ví dụ, thuật ngữ]) → "key" → "limit".
+- **Chỗ để nội dung theo từng loại block**: `steps` dùng `items` (mảng chuỗi, mỗi bước một phần tử) —
+  KHÔNG dùng `rows`. `map` dùng `rows`, mỗi row đúng **2** phần tử `[ví dụ, thuật ngữ]`.
+  Các block còn lại dùng `html`. Đặt nhầm chỗ thì nội dung bị bỏ qua và câu trả lời coi như trống.
 - Block "key" phải nêu đủ các ý trong core_claims, dùng thuật ngữ trong required_terms; ghi claims = ["C1", ...] tương ứng.
+- **Mọi thuật ngữ trong `required_terms` phải xuất hiện ĐÚNG NGUYÊN VĂN ít nhất một lần** trong cả câu trả lời
+  (không tính bảng). Viết `Query` chứ không chỉ "vector truy vấn"; viết `Key` chứ không chỉ "khoá".
+  Viết tắt `Q, K, V` chỉ được dùng SAU khi đã nhắc đủ tên đầy đủ một lần. Thiếu một từ là câu trả lời bị loại.
 - Mỗi block (trừ "outside", "formula") phải có src là các id trong decision.source_ids hoặc <passages>, và claims mà block đó nêu.
   Kể cả block "map" (bảng nối) và "analogy" cũng phải có src — để trống là câu trả lời bị loại.
 - Nội dung ngoài bài giảng (công thức chuẩn, chi tiết phép tính không có trong passages) đặt trong block "outside", src = [].

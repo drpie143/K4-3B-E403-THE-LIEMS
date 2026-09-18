@@ -304,10 +304,16 @@ class Orchestrator:
     def _to_answer(self, llm: LLMAnswer, d: Decision, card: Card, template: Answer | None = None) -> Answer:
         blocks = []
         for b in llm.blocks[:8]:
-            rows = [[clean_html(c) or "" for c in r[:2]] for r in (b.rows or []) if len(r) >= 2] or None
+            # Mô hình hay bỏ các bước vào `rows` một cột thay vì `items`. Bộ lọc bảng bên dưới
+            # cần đủ 2 cột nên sẽ xoá sạch nội dung block — vớt lại thay vì để câu trả lời rỗng
+            # (rỗng thì thiếu thuật ngữ bắt buộc → validator loại → rơi về mẫu dự phòng).
+            items_in, rows_in = list(b.items or []), list(b.rows or [])
+            if not items_in and rows_in and all(len(r) == 1 for r in rows_in):
+                items_in, rows_in = [r[0] for r in rows_in], []
+            rows = [[clean_html(c) or "" for c in r[:2]] for r in rows_in if len(r) >= 2] or None
             blocks.append(Block(
                 t=b.t, title=clean_html(b.title), html=clean_html(b.html), rows=rows,
-                items=[clean_html(x) or "" for x in (b.items or [])] or None,
+                items=[clean_html(x) or "" for x in items_in] or None,
                 src=list(dict.fromkeys(b.src)), claims=[c for c in b.claims if c in card.claim_ids],
             ))
         # Sửa nhẹ: block thiếu src → lấy theo mẫu đã duyệt (cùng nội dung) hoặc theo nguồn của quyết định.

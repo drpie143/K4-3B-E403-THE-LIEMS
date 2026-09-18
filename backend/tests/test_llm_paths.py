@@ -100,3 +100,26 @@ def test_replay_mode_uses_no_llm(make_orch):
     o = make_orch(replay=True)
     r = ask(o, "demo-moi", "self-attention là gì")
     assert r.kind == "explain" and not o.llm.calls and r.meta.fallback.startswith("replay")
+
+
+def test_steps_dat_nham_vao_rows_van_giu_duoc_noi_dung(make_orch):
+    """Mô hình bỏ các bước vào `rows` một cột thì phải vớt sang `items`, không được mất nội dung.
+
+    Lỗi cũ: bộ lọc bảng đòi mỗi row ít nhất 2 cột nên xoá sạch các row một cột. Block "steps"
+    chỉ còn tiêu đề, mất luôn thuật ngữ bắt buộc → validator loại → rơi về mẫu dự phòng,
+    mỗi lượt tốn thêm 2 lần gọi mô hình mà học viên vẫn nhận bài ngắn.
+    """
+    lac = dict(blocks=[dict(t="steps", title="Các bước tính self-attention", html=None, items=None,
+                            rows=[["So <b>Query</b> với <b>Key</b> → điểm liên quan cho từng cặp <b>token</b>."],
+                                  ["Qua softmax → điểm thành <b>trọng số</b>."],
+                                  ["Lấy <b>Value</b> theo trọng số → biểu diễn mới."]],
+                            src=["T06-130"], claims=["C1", "C2", "C3"])],
+               analogy_id=None, summary_for_next_turn="x")
+    o = make_orch({"explain": [lac]})
+    r = ask(o, "demo-vung", "Self-attention là gì?")
+    block = r.answer.blocks[0]
+    assert block.items and len(block.items) == 3, "các bước phải được vớt sang items"
+    assert not block.rows
+    assert "Query" in " ".join(block.items) and "Key" in " ".join(block.items)
+    assert not r.fidelity.missing_terms, f"vẫn thiếu thuật ngữ: {r.fidelity.missing_terms}"
+    assert r.meta.fallback is None, "không được rơi về mẫu dự phòng nữa"
