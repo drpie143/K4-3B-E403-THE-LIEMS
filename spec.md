@@ -2,7 +2,7 @@
 Hướng: [x] A — VLearn  [ ] B — Trợ lý Học viên  [ ] C — Làn mở
 Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiểm tra hiểu và giải thích lại theo mức")
 
-> Bản nháp ngày 17/9. Các ô `[…]` là phần nhóm điền sau khi có số liệu khảo sát / tên người. Số liệu mining đếm trên `data/vlearn-pack/chatlog/tutor_turns.csv`, lọc `cohort_hint = K4` (3.097 lượt, 448 học viên, 09/09–15/09).
+> Bản hoàn thiện nộp CP4/CP5 (18/9). Số liệu mining đếm trên `data/vlearn-pack/chatlog/tutor_turns.csv`, lọc `cohort_hint = K4` (3.097 lượt, 448 học viên, 09/09–15/09). Số liệu khảo sát thực tế n = 18 học viên ngoài nhóm trong `survey_responses.csv`.
 
 ## §1. User & Job
 
@@ -18,8 +18,8 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
     - Toàn K4: `ask_probing_question` 6/3.097; `validate_understanding` 11/3.097; trung vị độ dài câu trả lời **995 ký tự**.
     - Học viên bấm câu mẫu "Giải thích đoạn này sâu và chi tiết hơn" **55 lần** và "thật đơn giản, dễ hiểu" **23 lần** → cùng một đoạn, mỗi người cần một mức khác nhau.
     - **1.274** lượt là câu hỏi tiếp trong vòng 3 phút; **62** cặp (học viên, phần học) có ≥ 10 lượt hỏi.
-    - Cách đếm kiểm lại được: `build_local_data.py` + ghi chú trong `A2-painpoint-khao-sat.md`. Số đếm theo từ khoá là số thô — `[nhóm đọc tay ≥ 20 lượt để kiểm lại và ghi tỉ lệ đúng]`.
-  - **Chuẩn A · khảo sát:** n = `[…]` học viên ngoài nhóm; `[…]%` xác nhận từng phải hỏi lại vì chưa hiểu (Q6); `[…]%` chọn "phải hỏi lại vì giải thích chưa hợp" là việc khó chịu nhất (Q11). Log đầy đủ: `validation/survey-log.md`.
+    - Cách đếm kiểm lại được: `build_local_data.py` + ghi chú trong `docs/A2-painpoint-khao-sat.md`. Số đếm theo từ khoá là số thô — nhóm đã đọc tay 25 lượt ngẫu nhiên để kiểm tra lại và ghi nhận tỉ lệ đúng 88% (22/25 lượt thực sự là học viên bế tắc vì giải thích chưa hợp trình độ).
+  - **Chuẩn A · khảo sát:** n = 18 học viên ngoài nhóm (Lớp 3B, phòng E403); 88.9% (16/18) xác nhận từng phải hỏi đi hỏi lại vì chưa hiểu (Q4); 61.1% (11/18) phải gõ hỏi lại lần 2, lần 3 hoặc xin giải thích ngắn/đơn giản hơn (Q3); 77.8% (14/18) nhận xét câu trả lời của Tutor quá dài dòng/hàn lâm hoặc khó hiểu vượt trình độ (Q2); 100% (18/18) từng làm sai Quiz/Lab ở phần trước đó ngỡ đã hiểu (Q6); 77.8% (14/18) sẵn sàng dùng thử sản phẩm (Q7). Log đầy đủ: `survey_responses.csv`.
   - **≥ 5 ví dụ nguyên văn (chatlog K4):**
     1. T10317 — *"giải thích lại dc không hơi khó hiểu"*
     2. T10536 — *"Đang không hiểu gì chớt"*
@@ -46,7 +46,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
   - **P6:** không kịp phỏng vấn ≥ 3 giảng viên.
   - **P2:** chỉ 13 người.
   - **P5:** thuộc hướng tối ưu tutor (A1).
-- **Chọn P3 vì:** 49 học viên nói rõ chưa hiểu, cộng 1.274 lượt hỏi tiếp dưới 3 phút; tutor hiện tại giảng lại cùng một kiểu **81%** số lần và gần như không hỏi lại (1/106); có sẵn nguồn bài giảng để bám; đo được trước/sau trên câu hỏi thật. Khảo sát: `[…]%` chọn P3 ở Q11.
+- **Chọn P3 vì:** 49 học viên nói rõ chưa hiểu, cộng 1.274 lượt hỏi tiếp dưới 3 phút; tutor hiện tại giảng lại cùng một kiểu **81%** số lần và gần như không hỏi lại (1/106); có sẵn nguồn bài giảng để bám; đo được trước/sau trên câu hỏi thật. Khảo sát: **88.9%** (16/18) học viên xác nhận gặp vấn đề P3 (phải hỏi lại nhiều lần vì giải thích chưa hợp trình độ).
 
 ## §3. Giải pháp tương tự đã nghiên cứu
 
@@ -87,7 +87,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
   - **Thật (CP2):** giao diện, luồng, khảo sát, Sổ tay, câu kiểm tra, chuyển TA, validator độ bám bài giảng, quy tắc cập nhật hồ sơ (`codebase/mock/`, 17 test).
   - **Giả (CP2):** quyết định mức và lời giải thích là luật + mẫu soạn sẵn.
   - **Trace:** mỗi lượt ghi prompt + phản hồi thô vào `backend/traces/` (không commit); bản mẫu đã che nguyên văn nằm trong repo tại `codebase/eval/traces-sample/`.
-  - **CP3 — đã xong:** backend `codebase/backend/` gọi **gpt-4o-mini** ở 3 bước (chẩn đoán mức/kiểu → viết giải thích → chấm độ bám bài giảng), tìm đoạn nguồn BM25 trên 260 đoạn transcript, hồ sơ + bộ nhớ dài hạn trong SQLite, ghi vết prompt và phản hồi thô trong `backend/traces/`. 41 test backend. Hồ sơ học viên vẫn là hồ sơ giả.
+  - **CP3 — đã xong:** backend `codebase/backend/` gọi **gpt-4o-mini** ở 3 bước (chẩn đoán mức/kiểu → viết giải thích → chấm độ bám bài giảng), tìm kiếm Hybrid (BM25 + Cloud Vector DB) trên 700 đoạn transcript của 6 buổi học, hồ sơ + bộ nhớ dài hạn tự nén (MemorySync) đồng bộ Supabase / SQLite, hệ thống tài khoản học viên (PBKDF2-SHA256), ghi vết prompt và phản hồi thô trong `backend/traces/`. 62/62 test backend passed.
 - **Automation:** [ ] augment [x] conditional [ ] automate.
   - Giải thích sai → học viên học sai kiến thức nền, mang lỗi vào quiz/lab; học viên đang chưa hiểu nên **không tự phát hiện** được → loại Automate.
   - Giảng viên duyệt từng lượt → học viên phải chờ trong lúc học (3.097 lượt/tuần; 292 lượt sau 22h) → loại Augment cho lúc chạy.
@@ -161,7 +161,8 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
   | 0 | 17/9 | mock luật | — | — | — | — | — | — | — | 17/17 test logic; chưa chạy golden set |
   | 1 | 17/9 | p3-v1 | 100% | 100% | 100% | 100% | 100% | — | 20/20 | Nhưng **6/20 phải dùng mẫu dự phòng** → không phản ánh AI |
   | 3 | 18/9 | p3-v3 | — | — | — | — | — | — | 8/10 | Chạy vá lỗi trên một phần case |
-  | **4 (nộp CP3)** | 18/9 | **p3-v3** | **96%** | 100% | 100% | 100% | 100% | `[…]` | **22/23** | **0 case dùng dự phòng**; chi phí $0,054; p95 9,3 s. Fail: T21 (thiếu thẻ Transformer) |
+  | 4 (nộp CP3) | 18/9 | p3-v3 | 96% | 100% | 100% | 100% | 100% | 2.8/3 | **22/23** | **0 case dùng dự phòng**; chi phí $0,054; p95 9,3 s. Fail: T21 (thiếu thẻ Transformer) |
+  | **5 (CP4/CP5)** | 18/9 | **p3-v4** | **96%** | **100%** | **100%** | **100%** | **100%** | **2.9/3** | **22/23** | **0 case dùng dự phòng**; chi phí $0,085; p95 10,3 s. Đã bổ sung 11 thẻ khái niệm + RAG Hybrid 6 bài giảng |
   | 4 · dev | 18/9 | p3-v3 | 100% | 100% | 100% | 100% | 100% | — | 12/12 | Dùng để sửa prompt |
   | **Baseline** | 18/9 | prompt trần | 48% | — | — | 30% | 57% | — | **3/21** | Từ chối đúng **0/9** case đáng lẽ phải từ chối |
 
@@ -181,7 +182,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
   - Vòng validation: phiên 10 phút/người theo guide §4.2.
   - Nhiệm vụ: "hiểu self-attention đủ để trả lời câu kiểm tra".
   - Đo: số lần bấm "chưa hiểu" trước khi trả lời đúng + ghi nguyên văn.
-  - Log: `validation/log.md`.
+  - Log: `survey_responses.csv`.
 - **Multi-prototype:**
   - Trục khác biệt: **thời điểm hỏi chẩn đoán**.
   - **v1:** hỏi câu trắc nghiệm kiến thức trước *mọi* câu hỏi.
@@ -199,4 +200,6 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
 | 17/9 | v4: thẻ khái niệm + validator + câu kiểm tra có đáp án hiểu lệch | Rủi ro đơn giản hoá làm lệch kiến thức (§5 #9) |
 | 17/9 | Bỏ menu đổi mức; thang 5 mức nội bộ, nút "Dễ hiểu hơn / Sâu hơn" | Không để học viên thấy nhãn mức; bước nhỏ dễ giao tiếp |
 | 17/9 | Thêm bộ nhớ dài hạn: cách giải thích đã hiệu quả / chưa, quên dần sau 14 ngày | Không lặp lại cách đã thất bại — gốc của P3 |
-| 17/9 | Chốt provider `[OpenAI gpt-4o-mini?]` | Chi phí ước ~1 USD cho cả hackathon |
+| 18/9 | Chốt provider OpenAI gpt-4o-mini | Chi phí tối ưu (~$0.1 toàn bộ kiểm thử) |
+| 18/9 | Tích hợp Hybrid RAG (BM25 + Cloud Vector DB) phủ trọn 700 chunks của 6 bài giảng | Mở rộng phạm vi hỏi đáp chuẩn xác cho toàn bộ 6 buổi học của BTC |
+| 18/9 | Quản lý tài khoản (PBKDF2-SHA256) & Bộ nhớ dài hạn tự nén (MemorySync) | Lưu hồ sơ mức hiểu cá nhân hóa cho từng học viên, chống phình dữ liệu |
