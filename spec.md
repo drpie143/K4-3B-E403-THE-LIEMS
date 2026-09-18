@@ -1,4 +1,4 @@
-# AI SPEC — Trợ giảng AI giải thích lại đúng mức · Nhóm THE LIEMS · Zone [X]
+# AI SPEC — Trợ giảng AI giải thích lại đúng mức · Nhóm THE-LIEMS · Zone 3
 Hướng: [x] A — VLearn  [ ] B — Trợ lý Học viên  [ ] C — Làn mở
 Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiểm tra hiểu và giải thích lại theo mức")
 
@@ -171,13 +171,13 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới (A2 · "Kiể
 
   | Phần việc | Người |
   |---|---|
-  | Spec, bộ câu thử, video, demo | `[Tên D]` |
-  | Evidence (mining, khảo sát) | `[Tên A]` |
-  | Prompt, adapter LLM, thẻ khái niệm | `[Tên B]` |
-  | Code (orchestrator, validator, API, nối mock) | `[Tên C]` |
+  | Spec, bộ câu thử, video, demo | `Lê Văn Việt` |
+  | Evidence (mining, khảo sát) | `Mai Quang Dũng` |
+  | Prompt, adapter LLM, thẻ khái niệm | `Đặng Đỉnh Đoàn` |
+  | Code (orchestrator, validator, API, nối mock) | `Ngô Anh Khoa` |
 
   Kế hoạch chi tiết 9 bước đến CP5: tài liệu backend §12.
-- **Willing users:** `[Tên 1]`, `[Tên 2]`, `[Tên 3]` (ngoài nhóm).
+- **Willing users:** `Lê Thanh Tình`, `Phạm Huong Giang`, `Phạm Thành Thái` (ngoài nhóm).
   - Vòng validation: phiên 10 phút/người theo guide §4.2.
   - Nhiệm vụ: "hiểu self-attention đủ để trả lời câu kiểm tra".
   - Đo: số lần bấm "chưa hiểu" trước khi trả lời đúng + ghi nguyên văn.
