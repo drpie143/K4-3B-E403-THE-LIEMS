@@ -30,7 +30,15 @@ Viết lời giải thích lại cho học viên theo <decision>. Trả về Ans
 <selection>{{selection}}</selection>
 <student_message>{{text}}</student_message>
 
+<ask_type>{{ask_type}}</ask_type>
+
 <format>
+- **Trả lời đúng khía cạnh học viên hỏi (ask_type) ngay ở block đầu**: khai_niem = nó là gì · co_che = nó chạy thế nào ·
+  ung_dung = dùng để làm gì (chỉ nêu ứng dụng có trong passages/thẻ) · so_sanh = khác ở chỗ nào · vi_du = một ví dụ cụ thể.
+  Không trả lời sang khía cạnh khác rồi mới nói tới điều được hỏi.
+- Cấu trúc 4 phần (analogy → map → key → limit) chỉ bắt buộc khi ask_type là khai_niem hoặc co_che;
+  với khía cạnh khác, giữ ít nhất một block "key" chốt bằng thuật ngữ gốc.
+- Nếu bài giảng không nói về khía cạnh được hỏi, nói thẳng điều đó trong block "outside" thay vì suy diễn.
 - Nếu decision.prereq_first khác null: block đầu có t = "prereq", title = "Trước hết: <tên khái niệm>", giải thích khái niệm đó 1–2 câu theo <prerequisite_primer>.
 - Mức L1/L2 phải có đủ các block: "analogy" → "map" (rows là các cặp [ví dụ, thuật ngữ]) → "key" → "limit".
 - Block "key" phải nêu đủ các ý trong core_claims, dùng thuật ngữ trong required_terms; ghi claims = ["C1", ...] tương ứng.

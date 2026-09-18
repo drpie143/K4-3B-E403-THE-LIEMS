@@ -21,6 +21,7 @@
 | Bộ nhớ dài hạn | Mức hiểu từng khái niệm + **cách giải thích đã hiệu quả / chưa hiệu quả** + quên dần sau 14 ngày; không suy ra giữa các khái niệm | Giải quyết đúng gốc P3: lần sau không giảng lại cách đã thất bại (chi tiết §7.4) |
 | Chống lệch kiến thức | Thẻ khái niệm + validator luật + LLM chấm | Đã thiết kế ở `P3-v4-bo-sung.md` §3 |
 | Thang giải thích | **5 mức nội bộ** L1–L5; học viên chỉ thấy nút "Dễ hiểu hơn / Sâu hơn" | Bước nhỏ dễ giao tiếp; không dán nhãn học viên |
+| Khía cạnh câu hỏi | `ask_type`: khai_niem · co_che · ung_dung · so_sanh · vi_du · khac. Thẻ khái niệm có thể có phần trả lời riêng cho từng khía cạnh | Cùng một khái niệm nhưng hỏi "là gì" và "dùng để làm gì" phải ra hai câu trả lời khác nhau (lỗi phát hiện khi dùng thật 18/9) |
 | Demo an toàn | Bộ nhớ đệm câu trả lời + chế độ phát lại + engine luật làm dự phòng | Mạng/API lỗi lúc pitch vẫn chạy |
 
 ---

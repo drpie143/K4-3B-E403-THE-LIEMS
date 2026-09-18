@@ -57,3 +57,12 @@ def test_negated_misconception_is_not_a_hit(orch):
     assert rule_check(card, good, {"T06-127"}, "L3").misconceptions == []
     bad = [Block(t="p", html="Mô hình đọc lần lượt từng từ.", src=["T06-127"], claims=[])]
     assert rule_check(card, bad, {"T06-127"}, "L3").misconceptions == ["M2"]
+
+
+def test_aspect_answer_needs_only_one_claim(orch):
+    """Hỏi ứng dụng: không bắt phủ đủ 3 ý chính, nhưng vẫn phải bám ít nhất một ý và giữ thuật ngữ."""
+    card = orch.cards.get("self_attention")
+    blocks = [Block(t="p", html="Dùng để mô hình hiểu ngữ cảnh: <b>token</b> “nó” lấy <b>Value</b> từ “mèo” theo <b>trọng số</b> tính từ <b>Query</b>–<b>Key</b>.",
+                    src=["T06-132"], claims=["C3"])]
+    assert rule_check(card, blocks, {"T06-132"}, "L3", require_all_claims=False).ok
+    assert not rule_check(card, blocks, {"T06-132"}, "L3", require_all_claims=True).ok

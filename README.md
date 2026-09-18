@@ -42,16 +42,28 @@ Nhóm **THE LIEMS** · Lớp 3B · Phòng E403 · Mini Hackathon AI, Batch 04
 
 ## 4. Cài đặt
 
-Cần **Python 3.11+** và (tuỳ chọn) **Node 18+** để chạy test của giao diện.
+Cần **Python 3.11+**, và **Node 18+** nếu muốn chạy test của giao diện.
+
+**macOS / Linux**
 
 ```bash
 git clone <repo> && cd K4-3B-E403-THE-LIEMS
-
 python3 -m venv codebase/backend/.venv
-codebase/backend/.venv/bin/pip install -r requirements.txt      # = codebase/backend/requirements.txt
-
-cp codebase/backend/.env.example codebase/backend/.env          # điền key, KHÔNG commit file này
+codebase/backend/.venv/bin/pip install -r requirements.txt
+cp codebase/backend/.env.example codebase/backend/.env      # điền key, KHÔNG commit file này
 ```
+
+**Windows (PowerShell)**
+
+```powershell
+git clone <repo>; cd K4-3B-E403-THE-LIEMS
+py -3.11 -m venv codebase\backend\.venv
+codebase\backend\.venv\Scripts\pip install -r requirements.txt
+copy codebase\backend\.env.example codebase\backend\.env
+```
+
+> Trên Windows, mọi lệnh `codebase/backend/.venv/bin/xxx` đổi thành `codebase\backend\.venv\Scripts\xxx.exe`.
+> Các script `.sh` (như `check_no_data.sh`) chạy bằng **Git Bash** đi kèm Git for Windows.
 
 `.env` tối thiểu:
 
@@ -62,33 +74,99 @@ OPENAI_API_KEY=...
 ```
 
 - `LLM_PROVIDER=fake` chạy được **toàn bộ luồng mà không tốn tiền và không cần key** (dùng luật + mẫu đã duyệt).
-- Gemini free tier cũng chạy được: `LLM_PROVIDER=gemini`, `LLM_MODEL=gemini-2.5-flash`, `GEMINI_API_KEY=...`.
+- Gemini free tier: `LLM_PROVIDER=gemini`, `LLM_MODEL=gemini-2.5-flash`, `GEMINI_API_KEY=...`.
 
 ## 5. Chạy
 
+### 5.1 Giao diện + AI thật
+
 ```bash
-# 1) Giao diện + AI thật (khuyến nghị)
+# macOS / Linux
 cd codebase/backend && .venv/bin/uvicorn app.main:app --port 8000
-#    → mở http://localhost:8000/   (mock tự chạy ở chế độ live, gọi backend)
-
-# 2) Chỉ giao diện, không cần cài gì: bấm đúp codebase/mock/index.html  (chạy bằng luật)
-
-# 3) Thử 1 lượt với provider thật, in token/độ trễ/lỗi
-cd codebase/backend && .venv/bin/python ../scripts/smoke_llm.py
-
-# 4) Test
-codebase/backend/.venv/bin/python -m pytest -q codebase/backend   # 41 test backend (FakeLLM)
-node --test codebase/tests/engine.test.js                          # 17 test logic giao diện
-
-# 5) Đánh giá
-codebase/backend/.venv/bin/python codebase/eval/run_eval.py --round 5 --split dev
-codebase/backend/.venv/bin/python codebase/eval/run_eval.py --round 5 --split test
-codebase/backend/.venv/bin/python codebase/eval/run_eval.py --round 5 --split test --baseline
+```
+```powershell
+# Windows
+cd codebase\backend; .venv\Scripts\uvicorn.exe app.main:app --port 8000
 ```
 
-Mỗi câu hỏi tốn khoảng **$0,002** và **5–10 giây** (3 lời gọi AI: chẩn đoán → viết giải thích → chấm). Câu bị từ chối không gọi AI.
+Mở **http://localhost:8000/** → mock tự chạy ở chế độ live (gọi backend).
+Chỉ muốn xem giao diện, không cần cài gì: mở thẳng `codebase/mock/index.html` (Windows: `start codebase\mock\index.html`) — khi đó logic chạy bằng luật.
 
-Cách bấm thử từng kịch bản: [`codebase/README.md`](codebase/README.md) §1.
+### 5.2 Test
+
+```bash
+# macOS / Linux
+codebase/backend/.venv/bin/python -m pytest -q codebase/backend    # 43 test backend (FakeLLM, không cần key)
+node --test codebase/tests/engine.test.js                           # 17 test logic giao diện
+```
+```powershell
+# Windows
+codebase\backend\.venv\Scripts\python.exe -m pytest -q codebase\backend
+node --test codebase\tests\engine.test.js
+```
+
+### 5.3 Kiểm tra đang chạy trên **dữ liệu thật**
+
+Mặc định repo không có data pack, hệ thống chạy ở **chế độ tóm tắt**. Muốn trợ giảng trích đúng nguyên văn bài giảng thì sinh dữ liệu cục bộ (file sinh ra bị `.gitignore` chặn):
+
+```bash
+# macOS / Linux — trỏ tới thư mục data/vlearn-pack của khoá, đặt NGOÀI repo
+codebase/backend/.venv/bin/python codebase/scripts/build_local_data.py --pack "<đường dẫn>/data/vlearn-pack"
+codebase/backend/.venv/bin/python codebase/scripts/build_index.py
+```
+```powershell
+# Windows
+codebase\backend\.venv\Scripts\python.exe codebase\scripts\build_local_data.py --pack "D:\...\data\vlearn-pack"
+codebase\backend\.venv\Scripts\python.exe codebase\scripts\build_index.py
+```
+
+Dấu hiệu đang dùng dữ liệu thật:
+
+| Kiểm ở đâu | Phải thấy |
+|---|---|
+| `build_index.py` | dòng đầu `Chế độ: local · 260 đoạn` |
+| `curl -s localhost:8000/health` (Windows: `curl.exe`) | `"retrieval_mode":"local","passages":260` |
+| Giao diện | bấm mã nguồn `[T06-131]` dưới câu trả lời → hiện **nguyên văn lời giảng**, không phải tóm tắt |
+| Báo cáo eval | dòng `retrieval: local` ở đầu `eval/results/round*.md` |
+
+### 5.4 Thử một lượt với AI thật (rẻ, in rõ lỗi)
+
+```bash
+cd codebase/backend
+.venv/bin/python ../scripts/smoke_llm.py --full --user demo-moi   --text "bước 2 là gì mình chưa hiểu, sao lại cộng trọng số và cộng vào đâu"
+```
+```powershell
+cd codebase\backend
+.venv\Scripts\python.exe ..\scripts\smoke_llm.py --full --user demo-trung-binh --text "Tính ứng dụng của self-attention"
+```
+
+Cần thấy `tìm nguồn: local`, `Độ bám bài giảng: ĐẠT`, `Dự phòng: không`. Có dòng `⚠ Lỗi gọi LLM` nghĩa là **chưa** chạy AI thật (sai key / sai tên model).
+
+### 5.5 Đánh giá (golden set 37 case)
+
+```bash
+cd codebase
+backend/.venv/bin/python eval/run_eval.py --round 5 --split dev            # ~$0,05
+backend/.venv/bin/python eval/run_eval.py --round 5 --split test           # ~$0,06
+backend/.venv/bin/python eval/run_eval.py --round 5 --split test --baseline
+backend/.venv/bin/python eval/run_eval.py --round 5 --split dev --cases D13,D14   # chạy vài case cho rẻ
+```
+```powershell
+cd codebase
+backend\.venv\Scripts\python.exe eval\run_eval.py --round 5 --split test
+```
+
+Đọc kết quả ở `eval/results/round5-*.md`: xem cột **Dự phòng** trước cột %.
+
+### 5.6 Xuất trace cho TA xem
+
+```bash
+cd codebase/backend && .venv/bin/python ../scripts/export_trace_sample.py --limit 2
+```
+
+Mỗi câu hỏi tốn khoảng **$0,002** và **5–10 giây** (3 lời gọi AI: chẩn đoán → viết giải thích → chấm). Câu bị từ chối không gọi AI nên miễn phí.
+
+Cách bấm thử từng kịch bản trong giao diện: [`codebase/README.md`](codebase/README.md) §1.
 
 ---
 

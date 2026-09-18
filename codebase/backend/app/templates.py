@@ -31,6 +31,9 @@ def pick_analogy(card, d: Decision) -> str | None:
 
 
 def template_key(card, d: Decision) -> tuple[str, str | None]:
+    # Khía cạnh riêng (ứng dụng, so sánh…) có mẫu riêng trong thẻ.
+    if d.ask_type in getattr(card, "aspects", {}):
+        return f"aspect:{d.ask_type}", None
     if "first" in card.templates and len(card.templates) == 1:
         return "first", None
     r = rank(d.level)
@@ -49,7 +52,10 @@ def template_key(card, d: Decision) -> tuple[str, str | None]:
 def build_answer(cards: CardStore, d: Decision) -> Answer:
     card = cards.get(d.concept)
     key, analogy = template_key(card, d)
-    blocks = card.template(key) or card.template("first") or next(iter([card.template(k) for k in card.templates]))
+    if key.startswith("aspect:"):
+        blocks = [Block(**b) for b in card.aspects[key.split(":", 1)[1]]]
+    else:
+        blocks = card.template(key) or card.template("first") or next(iter([card.template(k) for k in card.templates]))
     blocks = list(blocks)
     if d.prereq_first:
         pre = cards.get(d.prereq_first)

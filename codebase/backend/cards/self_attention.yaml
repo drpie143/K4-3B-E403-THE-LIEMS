@@ -286,6 +286,34 @@ templates:
       src: [T06-160]
       claims: []
 
+# Trả lời riêng theo KHÍA CẠNH học viên hỏi (ask_type). Chỉ nói điều có trong bài giảng.
+aspects:
+  ung_dung:
+    - t: p
+      html: "Buổi Day 1 nói về ứng dụng của <b>self-attention</b> ở hai chỗ: nó cho mô hình nối các từ liên quan <b>dù nằm xa nhau</b> trong câu — điều mà mô hình cũ chỉ nhìn từ bên cạnh không làm được; và vì mô hình chỉ chú ý được có hạn, <b>ngữ cảnh bạn đưa vào</b> quyết định chất lượng kết quả."
+      src: [T04-055, T04-053]
+      claims: []
+    - t: steps
+      title: Ứng dụng theo bài giảng
+      items:
+        - "Hiểu đúng ngữ cảnh trong câu: “nó” được gắn với “con mèo” chứ không phải “cái bàn”."
+        - "Xử lý cả câu <b>song song</b> thay vì đọc dần, nên câu dài không bị quên đoạn đầu."
+        - "Khi làm việc với AI: chọn lọc ngữ cảnh đưa vào thay vì đổ hết — mô hình chú ý đúng chỗ hơn."
+      src: [T06-132, T06-127, T04-057]
+      claims: [C1, C3]
+    - t: key
+      html: "Cơ chế nền vẫn vậy: mỗi <b>token</b> dùng <b>Query</b> so với <b>Key</b> của các token khác cùng lúc để ra <b>trọng số</b>, rồi lấy <b>Value</b> theo trọng số đó."
+      src: [T06-130, T06-132]
+      claims: [C1, C2, C3]
+    - t: outside
+      html: "Các ứng dụng hay được nhắc ngoài bài (dịch máy, tóm tắt, chatbot) không có trong buổi Day 1 nên mình không khẳng định thêm."
+      src: []
+      claims: []
+    - t: p
+      html: "Muốn thấy tận mắt: Lab demo dùng bertviz để xem token nào đang chú ý token nào."
+      src: [T06-160]
+      claims: []
+
 # Đoạn thêm khi học viên hỏi "cộng trọng số vào đâu" (case T10728), chỉ ở L1–L3.
 extras:
   weighted_sum:

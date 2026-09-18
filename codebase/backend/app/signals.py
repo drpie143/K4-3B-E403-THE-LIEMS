@@ -8,6 +8,15 @@ from dataclasses import dataclass
 from .cards import CardStore
 from .textutil import norm
 
+# Khía cạnh học viên hỏi — thứ tự dò từ hẹp đến rộng.
+ASK_TYPES = [
+    ("ung_dung", re.compile(r"ung dung|dung de lam gi|de lam gi|lam duoc gi|ap dung|dung o dau|co tac dung gi|loi ich|giai quyet duoc gi")),
+    ("so_sanh", re.compile(r"khac gi|khac nhau|so voi|so sanh|hon kem|thay vi")),
+    ("vi_du", re.compile(r"vi du|minh hoa|cho mot case|truong hop cu the")),
+    ("co_che", re.compile(r"hoat dong|van hanh|co che|cach (no |)chay|tinh (nhu )?the nao|buoc \d|quy trinh|lam sao (no |)")),
+    ("khai_niem", re.compile(r"la gi|la sao|dinh nghia|nghia la|hieu the nao")),
+]
+
 CONFUSED = re.compile(r"chua hieu|khong hieu|ko hieu|\bk hieu|kho hieu|giai thich lai|chua ro|roi qua|don gian hon|de hieu hon|khong hieu gi")
 WEIGHTED_SUM = re.compile(r"cong trong so|cong vao dau|tong co trong so|weighted sum")
 # Thứ tự dò: khái niệm hẹp trước, rộng sau.
@@ -23,6 +32,7 @@ class Signals:
     reask: bool
     weighted_sum: bool
     vague: bool
+    ask_type: str  # ung_dung | so_sanh | vi_du | co_che | khai_niem | khac
 
 
 def _alias_regex(aliases: list[str]) -> re.Pattern:
@@ -58,9 +68,13 @@ class SignalDetector:
         if not concept and (confused or selection):
             concept = session.get("last_concept") or page_concept
             from_page = True
+        ask_type = next((name for name, rx in ASK_TYPES if rx.search(nq)), "khac")
         last = session.get("answered", {}).get(concept or "", 0)
-        reask = bool(last and not confused and now - last < self.reask_seconds)
+        # Hỏi lại = hỏi cùng một khía cạnh trong thời gian ngắn. Hỏi khía cạnh khác là câu hỏi mới.
+        same_aspect = session.get("last", {}).get(concept or "", {}).get("ask_type") in (None, ask_type)
+        reask = bool(last and not confused and same_aspect and now - last < self.reask_seconds)
         return Signals(
             text=text, concept=concept, concept_from_page=from_page, confused=confused,
             reask=reask, weighted_sum=bool(WEIGHTED_SUM.search(nq)), vague=confused and not in_question,
+            ask_type=ask_type,
         )

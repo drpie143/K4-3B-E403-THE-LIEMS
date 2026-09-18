@@ -33,6 +33,7 @@ class Card:
     checks: list[dict]
     templates: dict[str, list[dict]]
     extras: dict[str, dict] = field(default_factory=dict)
+    aspects: dict[str, list[dict]] = field(default_factory=dict)  # trả lời riêng theo khía cạnh hỏi
 
     @property
     def claim_ids(self) -> list[str]:
@@ -102,6 +103,7 @@ class CardStore:
                 analogy_limits=d.get("analogy_limits", []), misconceptions=d.get("misconceptions", []),
                 outside_lesson_notes=d.get("outside_lesson_notes", []), primer=d.get("primer", {}),
                 checks=d.get("checks", []), templates=d.get("templates", {}), extras=d.get("extras", {}),
+                aspects=d.get("aspects", {}) or {},
             )
         except KeyError as exc:
             raise CardError(f"{path.name}: thiếu trường {exc}") from exc
@@ -117,7 +119,7 @@ class CardStore:
                     errors.append(f"{card.id}: khái niệm nền {p} chưa có thẻ")
             if not card.templates:
                 errors.append(f"{card.id}: chưa có mẫu trả lời")
-            for key, blocks in card.templates.items():
+            for key, blocks in list(card.templates.items()) + list(card.aspects.items()):
                 for b in blocks:
                     for sid in b.get("src", []):
                         if sid not in self.sources:

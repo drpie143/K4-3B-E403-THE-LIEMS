@@ -34,3 +34,5 @@ T22,test,1,hiem,T13486,demo-trung-binh,ask,"nói ngắn gọn đủ ý về kỹ
 T23,test,1,hiem,T10998,demo-trung-binh,ask,"em chưa hiểu cái decoder-only là sao, vì mỗi model được train đều cần embed thành vector",,,,,no_source,,,,,,Câu hỏi về decoder-only nhưng có chữ 'vector' — bẫy nhận nhầm khái niệm
 D11,dev,1,hiem,T10962,demo-vung,ask,Decoder-only Transformer architecture giải thích lại,,,,,no_source,,,,,,
 D12,dev,1,hiem,T10807,demo-moi,ask,"ở bước 2 nó làm nóng bộ mã hoá của tiktoken là sao, hơi khó hiểu",,,,,no_source,,,,,,"Câu hỏi về lab, không thuộc nội dung buổi"
+D13,dev,0,thuong_gap,,demo-trung-binh,ask,Tính ứng dụng của self-attention,,,,self_attention,explain,L3,-,,Query;Key;Value,M1;M2;M3;M4,Hỏi KHÍA CẠNH ứng dụng — không được trả lời sang cơ chế. Lỗi phát hiện khi dùng thật 18/9
+D14,dev,2,thuong_gap,,demo-vung,ask,Self-attention ứng dụng như thế nào trong thực tế?,,L4/chi_tiet,,self_attention,explain,L4,-,,Query;Key;Value,M1;M2;M3;M4,"Vừa được giải thích cơ chế xong, hỏi sang ứng dụng → là câu hỏi mới, KHÔNG phải hỏi lại"

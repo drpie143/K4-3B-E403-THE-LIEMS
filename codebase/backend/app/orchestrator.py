@@ -128,6 +128,12 @@ class Orchestrator:
         order = sorted(hits, key=lambda p: (p.id not in grounded, -p.score))[: self.s.passages_for_llm]
         return [{"id": p.id, "section": p.section, "text": self.retriever.text_for(p.id, self.s.passage_max_chars)} for p in order]
 
+    def _passages_for(self, ids: list[str], hits: list[Passage], grounded: list[str], limit: int = 6) -> list[dict]:
+        """Đoạn nguồn cho bước chấm: mọi đoạn mà câu trả lời trích dẫn + các đoạn tìm được."""
+        order = list(dict.fromkeys(ids + [p.id for p in sorted(hits, key=lambda p: (p.id not in grounded, -p.score))]))
+        return [{"id": i, "section": (self.retriever.get(i).section if self.retriever.get(i) else self.cards.sources.get(i, {}).get("section", "")),
+                 "text": self.retriever.text_for(i, self.s.passage_max_chars)} for i in order[:limit]]
+
     def _grounding(self, card: Card, text: str, selection: str, lesson_id: str) -> tuple[list[Passage], list[str], set[str]]:
         query = " ".join([text, selection, card.term, *card.required_terms])
         hits = self.retriever.search(query, lesson_id, self.s.retrieval_top_k, boost_ids=card.source_ids)
@@ -144,10 +150,11 @@ class Orchestrator:
                   threshold=self.s.confidence_survey_threshold, terms=self.terms)
         return ctx, hits
 
-    @staticmethod
-    def _synthetic_signals(concept: str, text: str, confused: bool = False) -> Signals:
+    def _synthetic_signals(self, concept: str, text: str, confused: bool = False) -> Signals:
+        """Tín hiệu dựng lại cho các thao tác không phải câu hỏi mới (điều chỉnh, kiểm tra, sau khảo sát)."""
+        ask_type = self.detector.detect(text, "", {}, concept).ask_type if text else "khac"
         return Signals(text=text, concept=concept, concept_from_page=False, confused=confused,
-                       reask=False, weighted_sum=False, vague=False)
+                       reask=False, weighted_sum=False, vague=False, ask_type=ask_type)
 
     def _record_strategy(self, user_id: str, concept: str, sess: dict, outcome: str, parts=("style", "analogy")) -> None:
         last = sess.get("last", {}).get(concept)
@@ -288,10 +295,13 @@ class Orchestrator:
     def _explain(self, turn: Turn, ctx: Ctx, d: Decision, text: str, selection: str, hits: list[Passage],
                  note: str = "") -> tuple[Answer, FidelityReport]:
         card = ctx.card
+        # Hỏi "là gì / hoạt động thế nào" → phải phủ đủ ý chính. Hỏi khía cạnh khác (ứng dụng, ví dụ,
+        # so sánh) → chỉ cần bám ít nhất một ý chính, phần còn lại trả lời đúng câu hỏi.
+        need_all = d.ask_type in ("khai_niem", "co_che", "khac")
         template = build_answer(self.cards, d)
         allowed = ctx.allowed_sources
         cache_key = AnswerCache.key(
-            concept=card.id, level=d.level, style=d.style, prereq=d.prereq_first, analogy=d.preferred_analogy,
+            concept=card.id, ask=d.ask_type, level=d.level, style=d.style, prereq=d.prereq_first, analogy=d.preferred_analogy,
             alt=d.alt_example, full=d.full, ws=d.weighted_sum, prompt=self.prompts.version,
             model=self.s.model_explain, provider=self.provider,
         )
@@ -302,7 +312,7 @@ class Orchestrator:
                 return hit
         if self.s.replay:
             turn.fallback = turn.fallback or "replay:template"
-            return template, rule_check(card, template.blocks, allowed | {s for b in template.blocks for s in b.src}, d.level)
+            return template, rule_check(card, template.blocks, allowed | {s for b in template.blocks for s in b.src}, d.level, need_all)
 
         mem = ctx.memory
         pre = self.cards.get(d.prereq_first) if d.prereq_first else None
@@ -311,6 +321,7 @@ class Orchestrator:
             user = self.prompts.render(
                 "explain",
                 decision={k: v for k, v in d.model_dump().items() if k not in ("kind", "decided_by", "need_survey", "in_scope")},
+                ask_type=d.ask_type,
                 card=card.for_prompt(),
                 primer=pre.primer if pre else "(không cần)",
                 passages=self._passages(hits, ctx.grounded_ids),
@@ -335,18 +346,19 @@ class Orchestrator:
             ans = self._to_answer(llm_ans, d, card, template)
             if self.provider == "fake":
                 ans.key = template.key
-            rep = rule_check(card, ans.blocks, allowed, d.level)
+            rep = rule_check(card, ans.blocks, allowed, d.level, need_all)
             if rep.ok and self.s.use_judge:
+                cited = [i for b in ans.blocks for i in b.src]
                 judge_user = self.prompts.render(
                     "judge",
                     claims=card.core_claims,
                     misconceptions=[{"id": m["id"], "text": m["text"]} for m in card.misconceptions],
-                    passages=self._passages(hits, ctx.grounded_ids),
+                    passages=self._passages_for(cited, hits, ctx.grounded_ids),
                     answer=self._answer_text_for_judge(ans.blocks, self._approved_texts(card, template, pre)),
                 )
                 try:
                     judge = self._call(turn, "judge", judge_user, LLMJudge, self.s.model_judge, fallback=fake_judge(rep, card))
-                    rep = merge_judge(rep, judge, card)
+                    rep = merge_judge(rep, judge, card, need_all)
                 except LLMError:
                     rep.judge_verdict = "error"
             if rep.ok:
@@ -358,7 +370,7 @@ class Orchestrator:
                                   "text": plain_text(ans.blocks)[:1500]})
             fix = "- LẦN TRƯỚC BỊ LOẠI VÌ: " + "; ".join(rep.errors()) + ". Sửa đúng các lỗi này."
         turn.fallback = turn.fallback or "template:validator"
-        rep = rule_check(card, template.blocks, allowed | {s for b in template.blocks for s in b.src}, d.level)
+        rep = rule_check(card, template.blocks, allowed | {s for b in template.blocks for s in b.src}, d.level, need_all)
         return template, rep
 
     def _explain_response(self, turn: Turn, req, ctx: Ctx, d: Decision, text: str, selection: str,
@@ -368,7 +380,7 @@ class Orchestrator:
         now_ts = time.time()
         sess.setdefault("answered", {})[card.id] = now_ts
         sess.setdefault("last", {})[card.id] = {
-            "decision": d.model_dump(), "level": d.level, "style": d.style,
+            "decision": d.model_dump(), "level": d.level, "style": d.style, "ask_type": d.ask_type,
             "analogy_id": answer.analogy_id, "summary": answer.summary_for_next_turn or answer.key,
         }
         sess["last_concept"] = card.id

@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 Level = Literal["L1", "L2", "L3", "L4", "L5"]
 Style = Literal["vi_du", "ngan_gon", "chi_tiet"]
 GapType = Literal["thieu_nen", "can_vi_du", "qua_dai", "hieu_sai", "khong_ro"]
+AskType = Literal["khai_niem", "co_che", "ung_dung", "so_sanh", "vi_du", "khac"]
 BlockType = Literal["p", "prereq", "analogy", "map", "steps", "key", "limit", "outside", "formula"]
 Understanding = Literal["chua", "biet_so", "hieu_ro"]
 Kind = Literal["explain", "survey", "no_source", "out_of_scope", "injection", "help", "handoff"]
@@ -27,6 +28,7 @@ UNDERSTANDING_LABEL = {"chua": "Chưa", "biet_so": "Biết sơ", "hieu_ro": "Hi�
 # ---------------------------------------------------------------- LLM output
 class LLMDecision(BaseModel):
     concept: str
+    ask_type: AskType
     gap_type: GapType
     level: Level
     style: Style
@@ -87,6 +89,7 @@ class Block(BaseModel):
 class Decision(BaseModel):
     kind: Kind
     concept: Optional[str] = None
+    ask_type: AskType = "khac"
     gap_type: GapType = "khong_ro"
     level: Level = "L3"
     style: Style = "ngan_gon"

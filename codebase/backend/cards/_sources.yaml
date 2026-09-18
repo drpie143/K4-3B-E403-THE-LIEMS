@@ -21,6 +21,9 @@ sources:
   T04-056:
     section: "Attention, multi-head và bài học quản lý context"
     summary: "Multi-head: nhiều con mắt cùng nhìn, mỗi con mắt một đặc trưng, rồi tổng hợp — ví dụ thầy bói xem voi."
+  T04-057:
+    section: "Attention, multi-head và bài học quản lý context"
+    summary: "Bài học rút ra: quản lý sự chú ý và ngữ cảnh đưa cho mô hình thì làm việc với AI hiệu quả và tiết kiệm hơn."
   T04-073:
     section: "Từ mô hình đến AI agent"
     summary: "Từ mô hình đến AI agent: cho mô hình công cụ và ngữ cảnh để làm việc (mức tổng quan)."

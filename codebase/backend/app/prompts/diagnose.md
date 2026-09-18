@@ -41,6 +41,7 @@ Trả về Decision. KHÔNG viết lời giải thích.
 - Không đủ thông tin để chọn → need_survey = true và confidence < 0.6.
 - in_scope = false chỉ khi học viên yêu cầu việc không phải giải thích nội dung bài.
 - source_ids chỉ lấy từ id trong <passages>.
+- ask_type: khía cạnh học viên đang hỏi (khai_niem / co_che / ung_dung / so_sanh / vi_du / khac) — đọc kỹ câu hỏi.
 - misconception_suspected: id M* nếu câu học viên lộ ra một ý trong misconceptions, nếu không thì null.
 - reason_for_user: 1 câu tiếng Việt thân thiện nói vì sao giải thích như vậy; KHÔNG nhắc tên mức (L1…L5, "cơ bản", "nâng cao"...).
 - <rule_suggestion> là gợi ý từ luật; có thể khác nếu câu hỏi cho thấy rõ điều khác.

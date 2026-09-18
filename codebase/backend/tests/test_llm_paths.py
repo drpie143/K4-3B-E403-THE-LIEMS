@@ -2,7 +2,7 @@
 from app.llm.base import LLMError
 from app.schemas import ChatRequest
 
-GOOD_DECISION = dict(concept="self_attention", gap_type="can_vi_du", level="L5", style="chi_tiet",
+GOOD_DECISION = dict(concept="self_attention", ask_type="khai_niem", gap_type="can_vi_du", level="L5", style="chi_tiet",
                      missing_concepts=[], preferred_analogy=None, misconception_suspected=None, confidence=0.9,
                      need_survey=False, in_scope=True, source_ids=["T06-130", "T99-000"],
                      reason_for_user="Mình giải thích ở mức Chuyên sâu vì bạn giỏi.")

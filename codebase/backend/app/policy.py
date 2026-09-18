@@ -158,6 +158,7 @@ def rule_decide(ctx: Ctx) -> Decision:
     return Decision(
         kind="survey" if need_survey else "explain",
         concept=card.id,
+        ask_type=sig.ask_type,
         gap_type="thieu_nen" if missing else ("khong_ro" if sig.vague else "can_vi_du" if style == "vi_du" else "qua_dai"),
         level=level,
         style=style,
@@ -178,7 +179,7 @@ def to_llm(d: Decision) -> LLMDecision:
     return LLMDecision(
         concept=d.concept or "", gap_type=d.gap_type, level=d.level, style=d.style,
         missing_concepts=d.missing_concepts, preferred_analogy=d.preferred_analogy,
-        misconception_suspected=d.misconception_suspected, confidence=d.confidence,
+        ask_type=d.ask_type, misconception_suspected=d.misconception_suspected, confidence=d.confidence,
         need_survey=d.need_survey, in_scope=d.in_scope, source_ids=d.source_ids,
         reason_for_user=d.reason_for_user,
     )
@@ -203,6 +204,8 @@ def enforce(llm: LLMDecision, rules: Decision, ctx: Ctx) -> Decision:
 
     d.kind, d.need_survey = "explain", False
     d.gap_type = llm.gap_type
+    # Khía cạnh hỏi: luật nhận ra rõ thì giữ, mơ hồ ("khac") thì tin LLM.
+    d.ask_type = rules.ask_type if rules.ask_type != "khac" else llm.ask_type
     d.level = llm.level if llm.level in LEVELS else rules.level
     d.style = llm.style
     d.confidence = max(0.0, min(1.0, llm.confidence))

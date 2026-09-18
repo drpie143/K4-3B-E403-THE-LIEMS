@@ -88,9 +88,20 @@ def test_thumbs_down_twice_handoff(orch):
     assert f2.next == "handoff"
 
 
-def test_reask_within_3_minutes_triggers_survey(orch):
+def test_reask_same_aspect_triggers_survey(orch):
     ask(orch, "demo-vung", "Self-attention là gì?")
-    assert ask(orch, "demo-vung", "Self-attention hoạt động sao?").kind == "survey"
+    assert ask(orch, "demo-vung", "Self-attention nghĩa là gì vậy?").kind == "survey"
+
+
+def test_asking_another_aspect_is_not_a_reask(orch):
+    """Hỏi khía cạnh khác (ứng dụng) là câu hỏi mới, không phải hỏi lại."""
+    r1 = ask(orch, "demo-vung", "Self-attention là gì?", sid="s-aspect")
+    assert r1.decision.ask_type == "khai_niem"
+    r2 = ask(orch, "demo-vung", "Tính ứng dụng của self-attention", sid="s-aspect")
+    assert r2.kind == "explain" and r2.decision.ask_type == "ung_dung"
+    assert r2.answer.key == "aspect:ung_dung"
+    text = " ".join((b.html or "") + " ".join(b.items or []) for b in r2.answer.blocks)
+    assert "ứng dụng" in text.lower() and r2.fidelity.ok
 
 
 def test_memory_off_acts_like_no_profile(orch):

@@ -39,7 +39,8 @@ def plain_text(blocks: list[Block], include_tables: bool = True) -> str:
     return " ".join(p for p in parts if p)
 
 
-def rule_check(card: Card, blocks: list[Block], allowed_sources: set[str], level: str | None = None) -> FidelityReport:
+def rule_check(card: Card, blocks: list[Block], allowed_sources: set[str], level: str | None = None,
+               require_all_claims: bool = True) -> FidelityReport:
     text = plain_text(blocks)
     n = norm(text)
     covered = {c for b in blocks for c in b.claims}
@@ -58,12 +59,13 @@ def rule_check(card: Card, blocks: list[Block], allowed_sources: set[str], level
     if level:
         words = len(plain_text([b for b in blocks if b.t not in NOT_COUNTED], include_tables=False).split())
         rep.too_long = words > WORD_LIMIT.get(level, 300)
-    rep.ok = not (rep.missing_claims or rep.missing_terms or rep.misconceptions or rep.unlabeled
-                  or rep.bad_sources or rep.ability_labels or rep.too_long)
+    claims_ok = not rep.missing_claims if require_all_claims else rep.covered >= 1
+    rep.ok = claims_ok and not (rep.missing_terms or rep.misconceptions or rep.unlabeled
+                                or rep.bad_sources or rep.ability_labels or rep.too_long)
     return rep
 
 
-def merge_judge(rep: FidelityReport, judge: LLMJudge, card: Card) -> FidelityReport:
+def merge_judge(rep: FidelityReport, judge: LLMJudge, card: Card, require_all_claims: bool = True) -> FidelityReport:
     rep = rep.model_copy(deep=True)
     valid = set(card.claim_ids)
     judged_missing = [c.id for c in judge.claims if not c.ok and c.id in valid]
@@ -73,7 +75,8 @@ def merge_judge(rep: FidelityReport, judge: LLMJudge, card: Card) -> FidelityRep
     rep.misconceptions = sorted(set(rep.misconceptions) | {h for h in judge.misconception_hits if h in known})
     rep.unsupported = judge.unsupported_sentences[:5]
     rep.judge_verdict = judge.verdict
-    rep.ok = rep.ok and judge.verdict == "pass" and not judged_missing and not rep.misconceptions and not rep.unsupported
+    claims_ok = not judged_missing if require_all_claims else (rep.total - len(rep.missing_claims)) >= 1
+    rep.ok = rep.ok and judge.verdict == "pass" and claims_ok and not rep.misconceptions and not rep.unsupported
     return rep
 
 

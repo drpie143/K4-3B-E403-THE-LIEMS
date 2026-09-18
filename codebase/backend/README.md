@@ -21,6 +21,10 @@ python3 ../scripts/build_local_data.py
 LLM_PROVIDER=gemini LLM_MODEL=gemini-2.5-flash GEMINI_API_KEY=... .venv/bin/python ../scripts/smoke_llm.py
 ```
 
+**Windows (PowerShell):** đổi `.venv/bin/xxx` thành `.venv\Scripts\xxx.exe`, ví dụ
+`.venv\Scripts\uvicorn.exe app.main:app --port 8000` và `.venv\Scripts\python.exe -m pytest -q`.
+Đặt biến môi trường cho một lệnh: `$env:LLM_PROVIDER="fake"; .venv\Scripts\python.exe ...`
+
 Không có `data/chunks.local.json` → backend chạy **chế độ tóm tắt** (dùng tóm tắt trong `cards/_sources.yaml`); `/health` báo `retrieval_mode`.
 
 ## Cấu trúc
