@@ -57,8 +57,7 @@ CREATE TABLE IF NOT EXISTS person_chat_sessions (
 );
 
 -- 7. Bảng lưu trữ các chunk bài giảng và Dense Vector Embedding
--- MẶC ĐỊNH: vector(768) cho Google Gemini (MIỄN PHÍ 100%)
--- NẾU DÙNG OPENAI: đổi thành vector(1536)
+-- MẶC ĐỊNH hiện tại: vector(768). OpenAI text-embedding-3-small dùng dimensions=768 để khớp bảng.
 CREATE TABLE IF NOT EXISTS lecture_chunks (
   id TEXT PRIMARY KEY,
   lesson TEXT NOT NULL,
@@ -68,7 +67,7 @@ CREATE TABLE IF NOT EXISTS lecture_chunks (
   source_ids TEXT[] DEFAULT '{}'::text[],
   word_count INT DEFAULT 0,
   overlap_words INT DEFAULT 0,
-  embedding vector(768), -- Đổi thành vector(1536) nếu dùng OpenAI
+  embedding vector(768),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -79,7 +78,7 @@ USING hnsw (embedding vector_cosine_ops);
 
 -- 9. Hàm RPC tìm kiếm vector (match_chunks)
 CREATE OR REPLACE FUNCTION match_chunks (
-  query_embedding vector(768), -- Đổi thành vector(1536) nếu dùng OpenAI
+  query_embedding vector(768),
   match_count int DEFAULT 5,
   lesson_filter text DEFAULT NULL
 ) RETURNS TABLE (

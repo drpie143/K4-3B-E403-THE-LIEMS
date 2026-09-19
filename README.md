@@ -78,25 +78,30 @@ OPENAI_API_KEY=...
 - `LLM_PROVIDER=fake` chạy được **toàn bộ luồng mà không tốn tiền và không cần key** (dùng luật + mẫu đã duyệt).
 - Gemini free tier: `LLM_PROVIDER=gemini`, `LLM_MODEL=gemini-2.5-flash`, `GEMINI_API_KEY=...`.
 
-## 5. Chạy
+## 5. Chạy (Demo Localhost)
 
-### 5.1 Giao diện + AI thật
+### 5.1 Hướng dẫn mở Demo trên Localhost (Giao diện + AI thật)
 
-```bash
-# macOS / Linux
-cd backend && .venv/bin/uvicorn app.main:app --port 8000
-```
+Để demo đầy đủ giao diện và tính năng của Trợ giảng AI trên máy cá nhân, bạn làm theo 2 bước sau:
+
+**Bước 1: Chạy Backend (FastAPI)**
+Mở Terminal (PowerShell trên Windows) và chạy lệnh sau để khởi động server:
 ```powershell
 # Windows
-cd backend; .venv\Scripts\uvicorn.exe app.main:app --port 8000
+cd backend
+.\.venv\Scripts\uvicorn.exe app.main:app --port 8000 --reload
+```
+```bash
+# macOS / Linux
+cd backend && .venv/bin/uvicorn app.main:app --port 8000 --reload
 ```
 
-Mở **http://localhost:8000/** → giao diện tự chạy ở chế độ live (gọi backend thật).
+**Bước 2: Mở giao diện trên trình duyệt**
+- Mở trình duyệt web (Chrome/Edge/Safari) và truy cập vào đường dẫn: **http://localhost:8000/**
+- Hệ thống sẽ tự động chuyển hướng vào `http://localhost:8000/app/index.html?mode=live`. 
+- *(Lưu ý: Không dùng VS Code Live Server để mở file HTML vì sẽ làm mất kết nối API, hãy mở đúng qua link `localhost:8000` của backend).*
 
-- Xem bản offline chạy bằng luật, không cần backend: thêm `?mode=mock` vào URL,
-  hoặc mở thẳng `frontend/index.html` (Windows: `start frontend\index.html`).
-- Lần chạy đầu, backend nạp mô hình embedding ở nền mất ~30 giây. Mở `/health` một lần
-  rồi hẵng hỏi để câu đầu tiên không phải chờ (xem §8).
+> 💡 **Lần chạy đầu tiên:** Backend cần khoảng vài giây để kết nối database. Hãy thử F5 lại trang một lần, hoặc mở thẻ Bài học để chắc chắn giao diện đã lấy được dữ liệu trước khi demo.
 
 ### 5.2 Test
 

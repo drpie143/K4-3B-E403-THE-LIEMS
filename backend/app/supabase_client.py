@@ -65,11 +65,33 @@ class SupabaseClient:
         try:
             resp = self.client.post(f"{self.rest_url}/{table}", headers=headers, json=payload)
             if resp.status_code not in (200, 201, 204):
-                print(f"  [Supabase Error] POST {table} trả về {resp.status_code}: {resp.text}")
+                try:
+                    code = resp.json().get("code", "unknown")
+                except ValueError:
+                    code = "unknown"
+                print(f"  [Supabase Error] POST {table} trả về {resp.status_code}, code={code}")
             return resp.status_code in (200, 201, 204)
         except Exception as e:
             print(f"  [Supabase Error] Exception khi upsert: {e}")
             return False
+
+    def insert(self, table: str, record: dict) -> dict | None:
+        if not self.is_configured():
+            return None
+        headers = {**self.headers, "Prefer": "return=representation"}
+        try:
+            resp = self.client.post(f"{self.rest_url}/{table}", headers=headers, json=[record])
+            if resp.status_code in (200, 201):
+                rows = resp.json()
+                return rows[0] if rows else None
+            try:
+                code = resp.json().get("code", "unknown")
+            except ValueError:
+                code = "unknown"
+            print(f"  [Supabase Error] INSERT {table} trả về {resp.status_code}, code={code}")
+        except Exception as e:
+            print(f"  [Supabase Error] Exception khi insert: {e}")
+        return None
 
     def update(self, table: str, filter_params: dict[str, str], data: dict) -> bool:
         if not self.is_configured():

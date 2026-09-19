@@ -1155,7 +1155,7 @@
       renderNotebook();
     },
     onLesson() {              // gọi khi đổi buổi học
-      newChat();
+      // newChat(); // Tắt tự động làm mới chat để giữ nguyên đoạn chat khi đổi slide
     },
   };
 

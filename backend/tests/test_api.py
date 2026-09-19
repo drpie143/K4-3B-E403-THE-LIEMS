@@ -11,6 +11,8 @@ def client(orch):
 def test_full_http_flow(orch):
     c = client(orch)
     assert c.get("/health").json()["provider"] == "fake"
+    token = c.post("/api/auth/register", json={"email": "flow@example.com", "password": "password123"}).json()["token"]
+    c.headers.update({"Authorization": "Bearer " + token})
     u = {"user_id": "demo-trung-binh", "session_id": "h1"}
     r = c.post("/api/chat", json={**u, "text": "Self-attention là gì?"}).json()
     assert r["kind"] == "explain" and r["answer"]["blocks"]
@@ -34,7 +36,7 @@ def test_full_http_flow(orch):
     p = c.put("/api/profile", json={"user_id": u["user_id"], "memory_on": False}).json()
     assert p["profile"]["memory_on"] is False
     assert c.delete("/api/profile", params={"user_id": u["user_id"]}).json()["profile"]["concepts"] == {}
-    assert c.post("/api/profile/reset", json={"user_id": u["user_id"]}).json()["profile"]["concepts"]["token"]["level"] == "hieu_ro"
+    assert c.post("/api/profile/reset", json={"user_id": u["user_id"]}).json()["profile"]["concepts"] == {}
     s = c.get("/api/sources/T06-131").json()
     assert s["mode"] == "summary" and "Key" in s["text"]
     assert c.get("/api/sources/T00-000").status_code == 404

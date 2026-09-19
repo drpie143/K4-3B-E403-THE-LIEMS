@@ -78,7 +78,7 @@
         try { await API.logout(); } catch (e) { /* vẫn đăng xuất phía trình duyệt */ }
         API.setToken(null);
         setAccount(null);
-        toast("Đã đăng xuất");
+        root.location.reload();
       },
     }));
     box.appendChild(h("button", {
@@ -88,7 +88,7 @@
           await API.deleteAccount();
           API.setToken(null);
           setAccount(null);
-          toast("Đã xoá tài khoản");
+          root.location.reload();
         } catch (e) { toast(e.message); }
       },
     }));
@@ -146,7 +146,7 @@
           API.setToken(res.token);
           setAccount(res.account);
           overlay.classList.remove("open");
-          toast(mode === "login" ? "Chào bạn trở lại!" : "Đã tạo tài khoản — chúc học vui!");
+          root.location.reload();
         } catch (e) {
           err.hidden = false;
           err.textContent = e.message || "Không gọi được backend";
@@ -178,19 +178,25 @@
       if (menu && menu.classList.contains("open") && !menu.contains(e.target) && e.target !== btn) menu.classList.remove("open");
     });
     if (!API || !API.LIVE) return;
-    // Mở sẵn form đăng nhập khi vào bằng ?auth=1 (tiện khi demo)
-    const wantAuth = new URLSearchParams(root.location.search).get("auth") === "1";
     if (!API.token()) {
       setAccount(null);
-      if (wantAuth) openAuth("login");
+      openAuth("login");
       return;
     }
     try {
       const res = await API.me();
       setAccount(res.account);
     } catch (e) {
-      API.setToken(null);
+      if (e.status === 401) API.setToken(null);
       setAccount(null);
+      openAuth("login");
+      if (e.status !== 401) {
+        const error = $("#authBody .auth-err");
+        if (error) {
+          error.hidden = false;
+          error.textContent = e.message || "Không đồng bộ được tài khoản";
+        }
+      }
     }
   }
 

@@ -44,17 +44,17 @@ def test_no_inference_between_concepts(orch):
 def test_memory_off_returns_empty_and_writes_nothing(orch):
     orch.store.update_settings("demo-moi", memory_on=False)
     assert orch.store.learner_memory("demo-moi", "self_attention")["concepts"] == {}
-    before = orch.store.db.execute("SELECT COUNT(*) FROM person_events").fetchone()[0]
+    before = len(orch.store.sb.select("person_events", {}))
     assert orch.store.apply_event("demo-moi", "self_attention", "check_correct") is None
     orch.store.record_strategy("demo-moi", "self_attention", ["style:vi_du"], "worked")
-    assert orch.store.db.execute("SELECT COUNT(*) FROM person_events").fetchone()[0] == before
+    assert len(orch.store.sb.select("person_events", {})) == before
 
 
 def test_delete_all_clears_three_tables(orch):
     ask(orch, "demo-thu-vien", "Self-attention là gì?")
     orch.store.delete("demo-thu-vien")
     for table in ("person_profiles", "person_strategy_memory", "person_events"):
-        assert orch.store.db.execute(f"SELECT COUNT(*) FROM {table} WHERE user_id='demo-thu-vien'").fetchone()[0] == 0
+        assert orch.store.sb.select(table, {"user_id": "eq.demo-thu-vien"}) == []
 
 
 def test_correct_after_up_records_worked(orch):

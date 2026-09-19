@@ -28,6 +28,11 @@ from app.supabase_client import SupabaseClient
 _local_embedding_model = None
 
 
+def pgvector(values: list[float]) -> str:
+    """PostgREST expects pgvector values as a text literal, not a JSON array."""
+    return "[" + ",".join(f"{float(v):.8g}" for v in values) + "]"
+
+
 def get_embeddings(texts: list[str], settings) -> list[list[float]]:
     """Sinh vector embeddings qua local model intfloat/multilingual-e5-base."""
     import httpx
@@ -37,6 +42,8 @@ def get_embeddings(texts: list[str], settings) -> list[list[float]]:
     provider = getattr(settings, "embedding_provider", "").strip().lower()
     openai_key = os.environ.get("OPENAI_API_KEY")
     gemini_key = os.environ.get("GEMINI_API_KEY")
+    if not provider:
+        provider = "openai" if openai_key else ("gemini" if gemini_key else "")
 
     # 1. Local Embedding (Miễn phí 100%, Không giới hạn rate limit)
     if provider == "local" or provider == "e5":
@@ -67,7 +74,7 @@ def get_embeddings(texts: list[str], settings) -> list[list[float]]:
             return []
 
     # 2. Gemini
-    if (provider == "gemini" or not openai_key) and gemini_key:
+    if provider == "gemini" and gemini_key:
         model = "gemini-embedding-001"
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:batchEmbedContents?key={gemini_key}"
         requests = [{"model": f"models/{model}", "content": {"parts": [{"text": t}]}, "output_dimensionality": 768} for t in texts]
@@ -79,28 +86,25 @@ def get_embeddings(texts: list[str], settings) -> list[list[float]]:
                 print(f"! Lỗi Gemini embedding ({resp.status_code}): {resp.text}")
 
     # 3. OpenAI
-    if openai_key:
+    if provider == "openai" and openai_key:
         model = getattr(settings, "embedding_model", "text-embedding-3-small")
         url = "https://api.openai.com/v1/embeddings"
         headers = {"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"}
+        payload = {"input": texts, "model": model}
+        dims = int(getattr(settings, "embedding_dimensions", 0) or 0)
+        if dims:
+            payload["dimensions"] = dims
         with httpx.Client(timeout=60.0) as client:
-            resp = client.post(url, headers=headers, json={"input": texts, "model": model})
+            resp = client.post(url, headers=headers, json=payload)
             if resp.status_code == 200:
                 data = resp.json()["data"]
                 return [item["embedding"] for item in data]
             else:
                 print(f"! Lỗi OpenAI embedding ({resp.status_code}): {resp.text}")
 
-    # 4. Fallback kiểm thử khi chưa điền key
-    dim = 768 if provider in ("gemini", "local", "e5") else 1536
-    print(f"! Chưa cấu hình provider hợp lệ: sinh vector giả lập {dim} chiều để kiểm tra kết nối Supabase.")
-    import hashlib
-    vectors = []
-    for t in texts:
-        h = hashlib.sha256(t.encode("utf-8")).digest()
-        vec = [(float(b) / 255.0 - 0.5) for b in (h * 48)[:dim]]
-        vectors.append(vec)
-    return vectors
+    # 4. Fail visibly instead of generating fake/mock vectors.
+    print("! Invalid embedding provider/key; not generating fake vectors.")
+    return []
 
 
 def main():
@@ -144,7 +148,7 @@ def main():
                 "source_ids": c.get("source_ids", [c["id"]]),
                 "word_count": c.get("word_count", len(c["text"].split())),
                 "overlap_words": c.get("overlap_words", 0),
-                "embedding": emb,
+                "embedding": pgvector(emb),
             })
 
         ok = sb.upsert("lecture_chunks", records)

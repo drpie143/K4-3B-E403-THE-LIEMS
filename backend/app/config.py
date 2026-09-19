@@ -71,6 +71,7 @@ class Settings:
     dense_timeout: float = 4.0      # Trần chờ vector search trên Supabase mỗi câu hỏi
     embedding_provider: str = ""    # "openai" | "gemini" (nếu để trống, theo llm_provider)
     embedding_model: str = ""       # "text-embedding-3-small" hoặc "text-embedding-004"
+    embedding_dimensions: int = 768  # Supabase hiện dùng vector(768); OpenAI text-embedding-3-small hỗ trợ rút chiều
     supabase_url: str = ""
     supabase_key: str = ""
     memory_flush_every: int = 3        # bao nhiêu lượt hỏi thì đẩy bộ nhớ lên Supabase
@@ -83,7 +84,6 @@ class Settings:
     prompts_dir: Path = field(default_factory=lambda: BACKEND_DIR / "app" / "prompts")
     chunks_path: Path = field(default_factory=lambda: ROOT_DIR / "data" / "chunks.local.json")
     transcripts_dir: Path = field(default_factory=lambda: BACKEND_DIR / "Data" / "transcript")
-    db_path: Path = field(default_factory=lambda: BACKEND_DIR / "p3.db")
     trace_dir: Path = field(default_factory=lambda: BACKEND_DIR / "traces")
     cache_dir: Path = field(default_factory=lambda: BACKEND_DIR / ".cache")
     frontend_dir: Path = field(default_factory=lambda: ROOT_DIR / "frontend")
@@ -123,6 +123,7 @@ def load_settings(env_file: Path | None = None) -> Settings:
         dense_timeout=float(env.get("DENSE_TIMEOUT", "4")),
         embedding_provider=env.get("EMBEDDING_PROVIDER", "").strip().lower(),
         embedding_model=env.get("EMBEDDING_MODEL", "").strip(),
+        embedding_dimensions=int(env.get("EMBEDDING_DIMENSIONS", "768") or "0"),
         supabase_url=env.get("SUPABASE_URL", "").strip(),
         supabase_key=env.get("SUPABASE_KEY", "").strip(),
         memory_flush_every=int(env.get("MEMORY_FLUSH_EVERY", "3")),
@@ -130,7 +131,7 @@ def load_settings(env_file: Path | None = None) -> Settings:
         memory_max_strategies=int(env.get("MEMORY_MAX_STRATEGIES", "6")),
         memory_max_events=int(env.get("MEMORY_MAX_EVENTS", "50")),
     )
-    for key, attr in [("CHUNKS_PATH", "chunks_path"), ("DB_PATH", "db_path"), ("TRACE_DIR", "trace_dir"), ("CACHE_DIR", "cache_dir"), ("TRANSCRIPTS_DIR", "transcripts_dir")]:
+    for key, attr in [("CHUNKS_PATH", "chunks_path"), ("TRACE_DIR", "trace_dir"), ("CACHE_DIR", "cache_dir"), ("TRANSCRIPTS_DIR", "transcripts_dir")]:
         if env.get(key):
             setattr(s, attr, Path(env[key]))
     return s

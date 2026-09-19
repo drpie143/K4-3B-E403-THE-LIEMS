@@ -112,7 +112,7 @@
     const body = h("div", { class: "lslide-body" });
     s.paragraphs.filter((p) => !p.empty).forEach((p) => {
       body.appendChild(h("p", {}, [
-        p.text,
+        h("span", { html: p.text }),
         h("button", { class: "src", title: "Hỏi trợ giảng về đoạn này", text: "[" + p.id + "]",
           onclick: () => askAboutParagraph(p) }),
       ]));
@@ -130,7 +130,7 @@
         h("summary", { text: "Xem nguyên văn bài giảng (" + s.paragraphs.length + " đoạn)" }),
       ]);
       s.paragraphs.forEach((p) => det.appendChild(h("p", {}, [
-        h("span", { class: "lslide-rawid", text: p.id }), " ", (p.raw || p.text),
+        h("span", { class: "lslide-rawid", text: p.id }), " ", h("span", { html: (p.raw || p.text) }),
       ])));
       sec.appendChild(det);
     }
@@ -158,7 +158,11 @@
     const body = $("#lessonBody");
     if (!body) return;
     body.innerHTML = "";
-    data.sections.forEach((s, i) => body.appendChild(renderSlide(s, i, data.sections.length)));
+    if (data.pdf_url) {
+      body.appendChild(h("iframe", { src: data.pdf_url, style: "width: 100%; height: 80vh; border: none; border-radius: 8px;" }));
+    } else {
+      data.sections.forEach((s, i) => body.appendChild(renderSlide(s, i, data.sections.length)));
+    }
     const topTitle = $("#lessonDay");
     if (topTitle) topTitle.textContent = data.day + " · " + data.title;
     const prog = $(".progress");
@@ -204,7 +208,7 @@
     data.order = meta.order;
     state.current = meta;
     state.body = data;
-    root.P3_LESSON_CTX = { id: data.id, title: data.title, concepts: data.concepts, starters: starters(data) };
+    root.P3_LESSON_CTX = { id: data.id, title: data.title, day: data.day, concepts: data.concepts, starters: starters(data) };
     renderList();
     renderSections(data);
     renderBody(data);

@@ -31,6 +31,8 @@ def test_than_bai_khong_nam_trong_repo(orch):
 
 def test_api_lessons(orch):
     c = client(orch)
+    token = c.post("/api/auth/register", json={"email": "lessons@example.com", "password": "password123"}).json()["token"]
+    c.headers.update({"Authorization": "Bearer " + token})
     rows = c.get("/api/lessons").json()["lessons"]
     assert len(rows) == 6
     one = c.get("/api/lessons/day02-eval-data").json()

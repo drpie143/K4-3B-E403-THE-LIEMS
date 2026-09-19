@@ -35,7 +35,7 @@ def main():
         sys.exit("Đang là LLM_PROVIDER=fake — đặt biến môi trường sang openai/gemini/claude rồi chạy lại.")
     if not args.full:
         s.use_judge = False
-    o = Orchestrator(s, db_path=":memory:")
+    o = Orchestrator(s)
     print(f"Provider: {o.provider} · model: {s.llm_model} · judge: {'bật' if s.use_judge else 'tắt'} · tìm nguồn: {o.retriever.mode}")
 
     resp = o.chat(ChatRequest(user_id=args.user, session_id="smoke", text=args.text))

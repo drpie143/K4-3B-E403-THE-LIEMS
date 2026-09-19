@@ -1,37 +1,23 @@
-"""Tài khoản học viên: đăng ký, đăng nhập, phiên đăng nhập.
-
-Mỗi tài khoản có một `user_id` — đây chính là khoá của hồ sơ và bộ nhớ dài hạn,
-nên mỗi người đăng nhập sẽ thấy đúng mức hiểu và cách giải thích đã hiệu quả của mình.
-
-Lưu ở đâu: Supabase (bảng `accounts`, `account_sessions`) khi đã cấu hình
-SUPABASE_URL/SUPABASE_KEY; nếu chưa có thì lưu tạm trong SQLite cùng file p3.db.
-Mật khẩu luôn băm bằng PBKDF2-SHA256, không bao giờ lưu dạng thô.
-"""
+"""Supabase-only learner auth."""
 from __future__ import annotations
 
 import hashlib
-import os
 import re
 import secrets
-import sqlite3
-import threading
 import uuid
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ITERATIONS = 120_000
 SESSION_DAYS = 30
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS person_accounts (
-  id TEXT PRIMARY KEY, email TEXT UNIQUE, display_name TEXT, password_hash TEXT,
-  role TEXT DEFAULT 'learner', created_at TEXT, last_login_at TEXT);
-CREATE TABLE IF NOT EXISTS person_sessions (
-  token_hash TEXT PRIMARY KEY, account_id TEXT, created_at TEXT, expires_at TEXT);
-"""
-
 
 class AuthError(ValueError):
+    pass
+
+
+class AuthRemoteError(RuntimeError):
     pass
 
 
@@ -63,18 +49,19 @@ def token_hash(token: str) -> str:
 
 
 class AuthStore:
-    def __init__(self, db: sqlite3.Connection, supabase=None):
-        self.db = db
+    def __init__(self, supabase: Any):
         self.sb = supabase
-        self.lock = threading.RLock()
-        self.db.executescript(SCHEMA)
 
     @property
     def remote(self) -> bool:
         return bool(self.sb and self.sb.is_configured())
 
-    # ------------------------------------------------------------- đăng ký
+    def _require_remote(self) -> None:
+        if not self.remote:
+            raise AuthRemoteError("Chưa cấu hình Supabase. Điền SUPABASE_URL và SUPABASE_KEY trong backend/.env.")
+
     def register(self, email: str, password: str, display_name: str = "") -> dict:
+        self._require_remote()
         email = (email or "").strip().lower()
         if not EMAIL_RE.match(email):
             raise AuthError("Email chưa đúng định dạng.")
@@ -92,69 +79,57 @@ class AuthStore:
             "created_at": iso(now),
             "last_login_at": iso(now),
         }
-        with self.lock:
-            self.db.execute(
-                "INSERT INTO person_accounts VALUES (?,?,?,?,?,?,?)",
-                (acc["id"], acc["email"], acc["display_name"], acc["password_hash"], acc["role"],
-                 acc["created_at"], acc["last_login_at"]))
-            self.db.commit()
-        if self.remote:
-            self.sb.upsert("person_accounts", acc)
+        if not self.sb.upsert("person_accounts", acc):
+            raise AuthRemoteError("Không lưu được tài khoản lên Supabase. Kiểm tra SUPABASE_KEY và bảng person_accounts.")
         return self._public(acc)
 
-    # ----------------------------------------------------------- đăng nhập
     def login(self, email: str, password: str) -> tuple[dict, str]:
+        self._require_remote()
         acc = self._find((email or "").strip().lower())
         if not acc or not verify_password(password or "", acc.get("password_hash", "")):
             raise AuthError("Email hoặc mật khẩu chưa đúng.")
         token = secrets.token_urlsafe(32)
         now = utcnow()
+        last_login = iso(now)
         row = {
-            "token_hash": token_hash(token), "account_id": acc["id"],
-            "created_at": iso(now), "expires_at": iso(now + timedelta(days=SESSION_DAYS)),
+            "token_hash": token_hash(token),
+            "account_id": acc["id"],
+            "created_at": last_login,
+            "expires_at": iso(now + timedelta(days=SESSION_DAYS)),
         }
-        with self.lock:
-            self.db.execute("INSERT OR REPLACE INTO person_sessions VALUES (?,?,?,?)",
-                            (row["token_hash"], row["account_id"], row["created_at"], row["expires_at"]))
-            self.db.execute("UPDATE person_accounts SET last_login_at=? WHERE id=?", (iso(now), acc["id"]))
-            self.db.commit()
-        if self.remote:
-            self.sb.upsert("person_sessions", row)
-            self.sb.update("person_accounts", {"id": f"eq.{acc['id']}"}, {"last_login_at": iso(now)})
-        return self._public(acc), token
+        if not self.sb.update("person_accounts", {"id": f"eq.{acc['id']}"}, {"last_login_at": last_login}):
+            raise AuthRemoteError("Không cập nhật được tài khoản trên Supabase.")
+        if not self.sb.upsert("person_sessions", row):
+            raise AuthRemoteError("Không lưu được phiên đăng nhập lên Supabase.")
+        return self._public({**acc, "last_login_at": last_login}), token
 
     def logout(self, token: str) -> None:
-        th = token_hash(token or "")
-        with self.lock:
-            self.db.execute("DELETE FROM person_sessions WHERE token_hash=?", (th,))
-            self.db.commit()
         if self.remote:
-            self.sb.delete("person_sessions", {"token_hash": f"eq.{th}"})
+            self.sb.delete("person_sessions", {"token_hash": f"eq.{token_hash(token or '')}"})
 
     def account_for_token(self, token: str | None) -> dict | None:
         if not token:
             return None
-        th = token_hash(token)
-        row = self.db.execute("SELECT account_id, expires_at FROM person_sessions WHERE token_hash=?", (th,)).fetchone()
-        if row is None and self.remote:
-            rows = self.sb.select("person_sessions", {"token_hash": f"eq.{th}", "select": "account_id,expires_at"})
-            row = rows[0] if rows else None
-            if row:  # nhớ lại phiên đã mở ở máy khác
-                with self.lock:
-                    self.db.execute("INSERT OR REPLACE INTO person_sessions VALUES (?,?,?,?)",
-                                    (th, row["account_id"], iso(utcnow()), row["expires_at"]))
-                    self.db.commit()
-        if not row:
+        self._require_remote()
+        rows = self.sb.select(
+            "person_sessions",
+            {"token_hash": f"eq.{token_hash(token)}", "select": "account_id,expires_at", "limit": "1"},
+        )
+        if not rows:
             return None
-        data = dict(row) if not isinstance(row, dict) else row
-        if data.get("expires_at") and data["expires_at"] < iso(utcnow()):
+        row = rows[0]
+        if row.get("expires_at") and str(row["expires_at"]) < iso(utcnow()):
             self.logout(token)
             return None
-        acc = self._by_id(data["account_id"])
+        acc = self._by_id(row["account_id"])
         return self._public(acc) if acc else None
 
-    # ------------------------------------------------------------ hồ sơ tk
+    def sync_session(self, token: str) -> None:
+        if not self.account_for_token(token):
+            raise AuthRemoteError("Phiên đăng nhập không còn hợp lệ trên Supabase.")
+
     def update_account(self, account_id: str, display_name: str | None = None, password: str | None = None) -> dict:
+        self._require_remote()
         acc = self._by_id(account_id)
         if not acc:
             raise AuthError("Không tìm thấy tài khoản.")
@@ -166,58 +141,30 @@ class AuthStore:
                 raise AuthError("Mật khẩu cần ít nhất 8 ký tự.")
             patch["password_hash"] = hash_password(password)
         if patch:
-            sets = ", ".join(f"{k}=?" for k in patch)
-            with self.lock:
-                self.db.execute(f"UPDATE person_accounts SET {sets} WHERE id=?", (*patch.values(), account_id))
-                self.db.commit()
-            if self.remote:
-                self.sb.update("person_accounts", {"id": f"eq.{account_id}"}, patch)
+            if not self.sb.update("person_accounts", {"id": f"eq.{account_id}"}, patch):
+                raise AuthRemoteError("Không cập nhật được tài khoản trên Supabase.")
             acc = {**acc, **patch}
         return self._public(acc)
 
     def delete_account(self, account_id: str) -> None:
-        with self.lock:
-            self.db.execute("DELETE FROM person_sessions WHERE account_id=?", (account_id,))
-            self.db.execute("DELETE FROM person_accounts WHERE id=?", (account_id,))
-            self.db.commit()
-        if self.remote:
-            self.sb.delete("person_sessions", {"account_id": f"eq.{account_id}"})
-            self.sb.delete("person_accounts", {"id": f"eq.{account_id}"})
+        self._require_remote()
+        self.sb.delete("person_sessions", {"account_id": f"eq.{account_id}"})
+        self.sb.delete("person_accounts", {"id": f"eq.{account_id}"})
 
-    # --------------------------------------------------------------- nội bộ
     def _find(self, email: str) -> dict | None:
-        row = self.db.execute("SELECT * FROM person_accounts WHERE email=?", (email,)).fetchone()
-        if row:
-            return dict(row)
-        if self.remote:
-            rows = self.sb.select("person_accounts", {"email": f"eq.{email}", "select": "*"})
-            if rows:
-                self._cache(rows[0])
-                return rows[0]
-        return None
+        rows = self.sb.select("person_accounts", {"email": f"eq.{email}", "select": "*", "limit": "1"})
+        return rows[0] if rows else None
 
     def _by_id(self, account_id: str) -> dict | None:
-        row = self.db.execute("SELECT * FROM person_accounts WHERE id=?", (account_id,)).fetchone()
-        if row:
-            return dict(row)
-        if self.remote:
-            rows = self.sb.select("person_accounts", {"id": f"eq.{account_id}", "select": "*"})
-            if rows:
-                self._cache(rows[0])
-                return rows[0]
-        return None
-
-    def _cache(self, acc: dict) -> None:
-        with self.lock:
-            self.db.execute(
-                "INSERT OR REPLACE INTO person_accounts VALUES (?,?,?,?,?,?,?)",
-                (acc["id"], acc["email"], acc.get("display_name", ""), acc.get("password_hash", ""),
-                 acc.get("role", "learner"), acc.get("created_at", ""), acc.get("last_login_at", "")))
-            self.db.commit()
+        rows = self.sb.select("person_accounts", {"id": f"eq.{account_id}", "select": "*", "limit": "1"})
+        return rows[0] if rows else None
 
     @staticmethod
     def _public(acc: dict) -> dict:
         return {
-            "user_id": acc["id"], "email": acc["email"], "display_name": acc.get("display_name", ""),
-            "role": acc.get("role", "learner"), "created_at": acc.get("created_at", ""),
+            "user_id": acc["id"],
+            "email": acc["email"],
+            "display_name": acc.get("display_name", ""),
+            "role": acc.get("role", "learner"),
+            "created_at": acc.get("created_at", ""),
         }

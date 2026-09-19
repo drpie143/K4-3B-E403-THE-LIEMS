@@ -1,9 +1,9 @@
 """Danh mục 6 buổi học + phần thân bài đọc trên giao diện.
 
 Nguồn nội dung, theo thứ tự ưu tiên:
-  1. Đoạn nguyên văn đã nạp sẵn trong Retriever (data/chunks.local.json — KHÔNG commit)
-  2. Bảng `lecture_chunks` trên Supabase (nếu đã cấu hình SUPABASE_URL/KEY)
-  3. Tóm tắt do nhóm tự viết trong cards/_sources.yaml (chế độ "summary" — dùng khi máy chưa có data pack)
+  1. Bảng `lecture_chunks` trên Supabase.
+  2. Đoạn local trong Retriever chỉ khi chưa cấu hình Supabase.
+  3. Tóm tắt do nhóm tự viết trong cards/_sources.yaml.
 
 Repo công khai nên tuyệt đối không commit nguyên văn: file này chỉ *đọc* dữ liệu lúc chạy.
 """
@@ -99,10 +99,12 @@ class LessonStore:
 
     def source_mode(self, lesson_id: str) -> str:
         """local | supabase | summary — để giao diện nói rõ đang đọc dữ liệu nào."""
-        if self._local_paragraphs(lesson_id):
-            return "local"
         if self._supabase_paragraphs(lesson_id):
             return "supabase"
+        if self.sb and self.sb.is_configured() and not getattr(self.sb, "allow_local_fallback", False):
+            return "supabase_empty"
+        if self._local_paragraphs(lesson_id):
+            return "local"
         return "summary"
 
     # ------------------------------------------------------------- thân bài
@@ -121,6 +123,7 @@ class LessonStore:
             "subtitle": meta.get("subtitle", ""),
             "concepts": [c for c in meta.get("concepts", []) if self.cards.get(c)],
             "page_concept": next((c for c in meta.get("concepts", []) if self.cards.get(c)), None),
+            "pdf_url": meta.get("pdf_url"),
             "source": self.source_mode(lesson_id),
             "sections": sections,
         }
@@ -128,7 +131,10 @@ class LessonStore:
     def paragraphs(self, lesson_id: str) -> list[dict]:
         if lesson_id in self._cache:
             return self._cache[lesson_id]
-        rows = self._local_paragraphs(lesson_id) or self._supabase_paragraphs(lesson_id) or self._summary_paragraphs(lesson_id)
+        rows = self._supabase_paragraphs(lesson_id)
+        strict_supabase = self.sb and self.sb.is_configured() and not getattr(self.sb, "allow_local_fallback", False)
+        if not rows and not strict_supabase:
+            rows = self._local_paragraphs(lesson_id) or self._summary_paragraphs(lesson_id)
         self._cache[lesson_id] = rows
         return rows
 
@@ -138,6 +144,8 @@ class LessonStore:
 
     def _local_paragraphs(self, lesson_id: str) -> list[dict]:
         r = self.retriever
+        if self.sb and self.sb.is_configured() and not getattr(self.sb, "allow_local_fallback", False):
+            return []
         if not r or getattr(r, "mode", "") != "local":
             return []
         files = set(self._files(lesson_id))

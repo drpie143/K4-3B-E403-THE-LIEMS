@@ -73,7 +73,7 @@ class Orchestrator:
         from .lessons import LessonStore
         self.lessons = LessonStore(self.cards, settings, self.retriever, self.store.sb)
         from .auth import AuthStore
-        self.auth = AuthStore(self.store.db, self.store.sb)
+        self.auth = AuthStore(self.store.sb)
         self.prompts = Prompts(settings.prompts_dir)
         self.llm = llm or make_client(settings)
         self.cache = AnswerCache(settings.cache_dir)
@@ -155,7 +155,7 @@ class Orchestrator:
 
     def _grounding(self, card: Card, text: str, selection: str, lesson_id: str) -> tuple[list[Passage], list[str], set[str]]:
         query = " ".join([text, selection, card.term, *card.required_terms])
-        hits = self.retriever.search(query, lesson_id, self.s.retrieval_top_k, boost_ids=card.source_ids)
+        hits = self.retriever.search(query, None, self.s.retrieval_top_k, boost_ids=card.source_ids)
         # Một chunk có thể gộp nhiều đoạn (T04-055 chứa cả T04-056), nên phải soi cả source_ids
         # bên trong chunk — nếu chỉ so id chunk thì thẻ có nguồn nằm giữa chunk sẽ bị coi là "không có nguồn".
         grounded: list[str] = []
@@ -520,14 +520,9 @@ class Orchestrator:
             resp = self._scope(turn, "injection" if g.injection else "out_of_scope", text, lesson_id=req.lesson_id)
             self._trace(turn, "chat", req, resp)
             return resp
-        if g.outside_term:
-            resp = self._scope(turn, "no_source", text, term=_guess_term(text) or g.outside_term,
-                               nearest=self.cards.outside_terms.get(g.outside_term, []), lesson_id=req.lesson_id)
-            self._trace(turn, "chat", req, resp)
-            return resp
 
         sig = self.detector.detect(text, selection, sess, self.page_concept(req.lesson_id),
-                                   lesson_concepts=self.lesson_concepts(req.lesson_id))
+                                   lesson_concepts=list(self.cards.cards.keys()))
         if req.action == "confused":
             sig.confused, sig.vague, sig.reask = True, False, False
             sig.concept = req.concept_hint or sig.concept or sess.get("last_concept") or self.page_concept(req.lesson_id)
@@ -539,7 +534,7 @@ class Orchestrator:
             sig.concept = req.concept_hint
 
         if not sig.concept:
-            hits = self.retriever.search(f"{text} {selection}", req.lesson_id, self.s.retrieval_top_k)
+            hits = self.retriever.search(f"{text} {selection}", None, self.s.retrieval_top_k)
             strong = [h for h in hits if h.score >= self.s.retrieval_min_score]
             mapped = next((c for h in strong[:1] for c in self.cards.by_source(h.id)), None)
             if mapped:
@@ -556,7 +551,7 @@ class Orchestrator:
         card = self.cards.get(sig.concept)
         hits, grounded, allowed = self._grounding(card, text, selection, req.lesson_id)
         turn.mark("retrieval")
-        if not grounded:
+        if not hits:
             resp = self._scope(turn, "no_source", text, term=card.term, nearest=[h.id for h in hits[:2]], lesson_id=req.lesson_id)
             self._trace(turn, "chat", req, resp)
             return resp

@@ -79,10 +79,14 @@ Account = Depends(current_account)
 
 
 def own(req, account: dict | None):
-    """Khi đã đăng nhập, mọi thao tác gắn vào user_id của tài khoản đó — không cho gửi user_id người khác."""
-    if account:
-        req = req.model_copy(update={"user_id": account["user_id"]})
-    return req
+    """Scope account and chat session to the authenticated learner."""
+    if not account:
+        return req
+    uid = account["user_id"]
+    changes = {"user_id": uid}
+    if hasattr(req, "session_id"):
+        changes["session_id"] = f"{uid}:{req.session_id}"
+    return req.model_copy(update=changes)
 
 
 def own_id(user_id: str, account: dict | None) -> str:
@@ -305,3 +309,9 @@ if _settings.frontend_dir.exists():
     # Tiện khi chạy trên một máy: backend phục vụ luôn frontend cùng origin, không lo CORS.
     # Khi deploy tách đôi (Vercel), phần mount này chỉ là bản dự phòng.
     app.mount("/app", StaticFiles(directory=_settings.frontend_dir, html=True), name="frontend")
+
+# Mount slides directory
+from pathlib import Path
+_slide_dir = Path(__file__).parent.parent.parent / "data" / "Slide"
+if _slide_dir.exists():
+    app.mount("/slides", StaticFiles(directory=_slide_dir), name="slides")
